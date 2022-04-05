@@ -4,8 +4,9 @@ import scalafx.geometry.Orientation.Horizontal
 
 import java.awt
 import java.awt.event.ActionListener
-import java.awt.{Color, Dimension, Font, Graphics2D, RenderingHints}
-import java.awt.geom.Ellipse2D
+import java.awt.{BasicStroke, Color, Dimension, Font, GradientPaint, Graphics2D, Paint, RenderingHints}
+
+import java.awt.geom.{Ellipse2D, GeneralPath, Path2D}
 import scala.swing._
 import scala.swing.event.ButtonClicked
 
@@ -20,6 +21,9 @@ object GameLauncher {
 class TowerDefenceGame extends SwingApplication {
   val peli = new Game(30)
 
+  peli.addEnemy(new Enemy(30, 20, peli.enemyPath)) // test
+  peli.addEnemy(new Enemy(30, 15, peli.enemyPath)) // test
+
   val fontC = new Font("Courier", java.awt.Font.PLAIN, 13)
 
     val prgtext = new TextArea {
@@ -29,12 +33,32 @@ class TowerDefenceGame extends SwingApplication {
     rows = 15
     font = fontC
   }
+
+  def drawMap(path : List[Pos]) = {
+    val polyline = new GeneralPath(Path2D.WIND_NON_ZERO, 10)
+    polyline.moveTo(path.head.x, path.head.y)
+    for (positio <- path) {
+      polyline.lineTo(positio.x,positio.y)
+    }
+
+
+
+    polyline
+  }
   val arena = new Panel {
     background = new Color(255,132, 132)
     override def paintComponent(g: Graphics2D): Unit = {
 
       g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+      g.setStroke(new BasicStroke(15))
+
+
+      g.setColor(Color.CYAN)
+
+      g.draw(drawMap(peli.enemyPath))
+
       peli.update(g)
+
     }
 
 
@@ -110,6 +134,7 @@ class TowerDefenceGame extends SwingApplication {
     }
     contents = gms
 
+
     listenTo(arena.mouse.clicks)
     listenTo(arena.mouse.moves)
     listenTo(towerButton1)
@@ -141,7 +166,7 @@ class TowerDefenceGame extends SwingApplication {
     reactions += {
       case scala.swing.event.MouseMoved(src, point, k) => {
         if (peli.selected) {
-          repaint()
+
 
 
         }
@@ -154,7 +179,7 @@ class TowerDefenceGame extends SwingApplication {
     reactions += {
         case scala.swing.event.MousePressed(src, point, _, _, _) => {
           if (src == arena) {
-            println("in arena")
+
             if (peli.selected) {
               peli.placeTower(new Tower(30, new Pos(point.x, point.y), 3))
               peli.unselectTower()
@@ -163,9 +188,20 @@ class TowerDefenceGame extends SwingApplication {
 
           }
           console.text = point.x.toString
-          println(peli.towers)
+          println("(" +point.x.toString + "," + point.y.toString+"),")
         }
       }
+    val listener = new ActionListener(){
+      def actionPerformed(e : java.awt.event.ActionEvent) = {
+        peli.step()
+        repaint()
+      }
+    }
+
+
+    val timer = new javax.swing.Timer(6, listener)
+    timer.start()
+
 
 
 
@@ -178,6 +214,7 @@ class TowerDefenceGame extends SwingApplication {
   val t = top
   t.centerOnScreen()
   t.visible = true
+
 
 
 }
