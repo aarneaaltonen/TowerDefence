@@ -21,10 +21,15 @@ object GameLauncher {
 class TowerDefenceGame extends SwingApplication {
   val peli = new Game(30)
 
-  peli.addEnemy(new Enemy(250, 20, peli.enemyPath)) // test
-  peli.addEnemy(new Enemy(250, 15, peli.enemyPath)) // test
+
+  peli.createEnemies()
+
+
+
 
   val fontC = new Font("Courier", java.awt.Font.PLAIN, 13)
+  var mouseXPos = 0
+  var mouseYPos = 0
 
     val prgtext = new TextArea {
     background = new Color(250, 250, 250)
@@ -56,15 +61,14 @@ class TowerDefenceGame extends SwingApplication {
       g.setColor(Color.CYAN)
 
       g.draw(drawMap(peli.enemyPath))
+      if (peli.selected) {
+        peli.drawOnMouse(g, mouseXPos, mouseYPos)
+      }
 
       peli.update(g)
 
     }
-
-
   }
-
-
 
   val console = new TextPane {
     font = fontC
@@ -84,12 +88,16 @@ class TowerDefenceGame extends SwingApplication {
   val towerButton2 = new Button("Buy")
   val towerButton3 = new Button("Buy")
 
+  val nextRoundButton = new Button("next round")
+
   // create buy menu
 
   val buyMenu = new GridPanel(3,3) {
     contents += towerButton1
     contents += towerButton2
     contents += towerButton3
+    contents += nextRoundButton
+
 
 
   }
@@ -130,6 +138,7 @@ class TowerDefenceGame extends SwingApplication {
     menuBar = new MenuBar{
       contents += new Menu("testi") {
         contents += new MenuItem("New Game")
+
       }
     }
     contents = gms
@@ -139,6 +148,7 @@ class TowerDefenceGame extends SwingApplication {
     listenTo(arena.mouse.moves)
     listenTo(towerButton1)
     listenTo(towerButton2)
+    listenTo(nextRoundButton)
 
     //react to button clicks
 
@@ -158,6 +168,11 @@ class TowerDefenceGame extends SwingApplication {
         if (b == towerButton2) {
           println("2")
         }
+        if (b == nextRoundButton) {
+          if (peli.paused) {
+            peli.advanceRound()
+          }
+        }
       }
     }
 
@@ -166,9 +181,9 @@ class TowerDefenceGame extends SwingApplication {
     reactions += {
       case scala.swing.event.MouseMoved(src, point, k) => {
         if (peli.selected) {
-
-
-
+          mouseXPos = point.x
+          mouseYPos = point.y
+          repaint()
         }
       }
     }
@@ -180,22 +195,28 @@ class TowerDefenceGame extends SwingApplication {
         case scala.swing.event.MousePressed(src, point, _, _, _) => {
           if (src == arena) {
             if (peli.selected) {
-              peli.placeTower(new Tower(2, new Pos(point.x, point.y), 200))
+              peli.placeTower(new Tower(10, new Pos(point.x, point.y), 300))
               peli.unselectTower()
               repaint()
             } else if(peli.towers.forall(p => !p.isSelected)) {
             peli.towers.foreach(p => if(new Pos(point.x, point.y).distance(p.position)< p.r) p.selectTower())
-            } else peli.towers.foreach(_.unselectTower())
+              repaint()
+            } else  {
+              peli.towers.foreach(_.unselectTower())
+              repaint()
+            }
 
           }
           console.text = point.x.toString
-          println("(" +point.x.toString + "," + point.y.toString+"),")
+
         }
       }
     val listener = new ActionListener(){
       def actionPerformed(e : java.awt.event.ActionEvent) = {
-        peli.step()
-        repaint()
+        if (!peli.paused) {
+          peli.step()
+          repaint()
+        }
       }
     }
 

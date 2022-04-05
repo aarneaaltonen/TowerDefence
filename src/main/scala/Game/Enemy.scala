@@ -12,6 +12,7 @@ import java.awt.{Color, Graphics2D}
 
 class Enemy(var healthPoints : Int, var speed : Int,val path : List[Pos]) {
   var position = path.head
+  var maxHealth = healthPoints
   private var path_pos = 0
   private var move_count = 0.0
   private var move_dis = 0
@@ -50,12 +51,15 @@ class Enemy(var healthPoints : Int, var speed : Int,val path : List[Pos]) {
         }
       }
     }
-
   }
 
   def draw(g : Graphics2D) = {
+    println(healthPoints)
     g.setColor(Color.black)
     g.fillOval((position.x-(10/2)).toInt,(position.y-(10/2)).toInt, 10,10)
+    var precentage = healthPoints.toDouble / maxHealth.toDouble
+    g.setColor(Color.red)
+    g.fillRect((position.x-(10/2)).toInt, (position.y-(20)).toInt, (precentage*10).toInt, 5)
 
   }
   def takeDamage(amount : Int) = {

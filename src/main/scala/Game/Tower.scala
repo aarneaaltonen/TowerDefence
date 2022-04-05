@@ -1,6 +1,7 @@
 package Game
 
 import java.awt.{Color, Graphics2D}
+
 import scala.collection.mutable
 
 class Tower(val damage : Int, var position : Pos, val range : Int) {
@@ -9,6 +10,10 @@ class Tower(val damage : Int, var position : Pos, val range : Int) {
 
   def selectTower() = isSelected = true
   def unselectTower() = isSelected = false
+
+  var attackSpeed = 20
+  var counter = 0
+
 
   def attack(enemies : mutable.Buffer[Enemy]) = {
     var inRange = false
@@ -21,7 +26,11 @@ class Tower(val damage : Int, var position : Pos, val range : Int) {
       }
     }
     if (closestEnemy.nonEmpty) {
-      closestEnemy.head.takeDamage(damage)
+      if (counter ==attackSpeed) {
+        counter = 0
+         closestEnemy.head.takeDamage(damage)
+      } else counter += 1
+
 
     }
   }
