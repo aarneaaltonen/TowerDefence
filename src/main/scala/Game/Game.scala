@@ -48,6 +48,13 @@ class Game(var healtPoints : Int) {
   }
   def step() = {
     enemies.foreach(_.move())
+    towers.foreach(_.attack(enemies))
+    var toBeDeleted = Buffer[Enemy]()
+    enemies.foreach(p => if (p.healthPoints < 0) toBeDeleted += p)
+    enemies --= toBeDeleted
+
+
+
   }
 
   def update(g : Graphics2D) = {

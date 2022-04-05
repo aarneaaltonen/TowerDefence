@@ -58,5 +58,8 @@ class Enemy(var healthPoints : Int, var speed : Int,val path : List[Pos]) {
     g.fillOval((position.x-(10/2)).toInt,(position.y-(10/2)).toInt, 10,10)
 
   }
+  def takeDamage(amount : Int) = {
+    healthPoints = healthPoints - amount
+  }
 
 }

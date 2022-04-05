@@ -21,8 +21,8 @@ object GameLauncher {
 class TowerDefenceGame extends SwingApplication {
   val peli = new Game(30)
 
-  peli.addEnemy(new Enemy(30, 20, peli.enemyPath)) // test
-  peli.addEnemy(new Enemy(30, 15, peli.enemyPath)) // test
+  peli.addEnemy(new Enemy(250, 20, peli.enemyPath)) // test
+  peli.addEnemy(new Enemy(250, 15, peli.enemyPath)) // test
 
   val fontC = new Font("Courier", java.awt.Font.PLAIN, 13)
 
@@ -179,12 +179,13 @@ class TowerDefenceGame extends SwingApplication {
     reactions += {
         case scala.swing.event.MousePressed(src, point, _, _, _) => {
           if (src == arena) {
-
             if (peli.selected) {
-              peli.placeTower(new Tower(30, new Pos(point.x, point.y), 3))
+              peli.placeTower(new Tower(2, new Pos(point.x, point.y), 200))
               peli.unselectTower()
               repaint()
-            }
+            } else if(peli.towers.forall(p => !p.isSelected)) {
+            peli.towers.foreach(p => if(new Pos(point.x, point.y).distance(p.position)< p.r) p.selectTower())
+            } else peli.towers.foreach(_.unselectTower())
 
           }
           console.text = point.x.toString
