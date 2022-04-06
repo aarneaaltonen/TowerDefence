@@ -13,9 +13,7 @@ import scala.swing.event.ButtonClicked
 object GameLauncher {
   def main(args : Array[String] = Array()): Unit = {
     new TowerDefenceGame()
-
   }
-
 }
 
 class TowerDefenceGame extends SwingApplication {
@@ -50,7 +48,10 @@ class TowerDefenceGame extends SwingApplication {
 
     polyline
   }
+
+
   val arena = new Panel {
+
     background = new Color(255,132, 132)
     override def paintComponent(g: Graphics2D): Unit = {
 
@@ -131,12 +132,22 @@ class TowerDefenceGame extends SwingApplication {
   rightSide.dividerSize = 0
   rightSide.dividerLocation = 300
 
+
   // all screen elements together in gms
 
   val gms = new SplitPane(Orientation.Vertical, arenaWithConsole, rightSide) {
+
   }
+  def restartGame() = {
+    peli.restart()
+    arena.repaint()
+  }
+
+
   gms.dividerSize = 0
   gms.dividerLocation = 900
+
+
 
 
 
@@ -151,9 +162,11 @@ class TowerDefenceGame extends SwingApplication {
     preferredSize = new Dimension(1200, 800)
     maximumSize = new Dimension(1200,800)
     resizable = false
+
     menuBar = new MenuBar{
       contents += new Menu("testi") {
-        contents += new MenuItem("New Game")
+        contents += new MenuItem(Action("New Game")
+        (restartGame()))
       }
     }
     contents = gms
@@ -241,19 +254,27 @@ class TowerDefenceGame extends SwingApplication {
       }
     val listener = new ActionListener(){
       def actionPerformed(e : java.awt.event.ActionEvent) = {
-        if (!peli.paused) {
-          peli.step()
+        if(peli.gameOver) {
+          console.text = "Game Over"
 
-          coinCounter.text = peli.coins.toString
-          roundIndicator.text  = peli.currentRound.toString
-          healtPointIndicator.text = peli.healtPoints.toString
 
-          repaint()
         }
+        if(!peli.gameOver) {
+          if (!peli.paused) {
+            peli.step()
+            coinCounter.text = peli.coins.toString
+            roundIndicator.text  = peli.currentRound.toString
+            healtPointIndicator.text = peli.healtPoints.toString
+            repaint()
+          }
+        }
+
       }
     }
+
     val timer = new javax.swing.Timer(6, listener)
     timer.start()
+
   }
   val t = top
   t.centerOnScreen()

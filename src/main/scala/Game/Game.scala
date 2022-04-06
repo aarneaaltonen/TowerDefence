@@ -4,19 +4,15 @@ import java.awt.{Color, Graphics2D}
 import scala.collection.mutable.Buffer
 import scala.util.Random
 
-class Game(var healtPoints : Int, var startingCoins : Int = 300) {
-
-
+class Game(var startingHealt : Int, var startingCoins : Int = 300) {
 
   var coins = startingCoins
-
+  var healtPoints = startingHealt
   var paused = false
-
   var towers = Buffer[Tower]()
   var enemies = Buffer[Enemy]()
-
   var currentRound = 0
-
+  var gameOver = false
   val enemyPath : List[(Pos)] = List(
                                           new Pos(-100,75),
                                           new Pos(159,77),
@@ -44,7 +40,7 @@ class Game(var healtPoints : Int, var startingCoins : Int = 300) {
    *  */
   var rounds = List[(Int, Int, Int, Int, Int)](
     (0,0,0,0,0),
-    (0,0,0,5,0),
+    (0,0,0,30,0),
     (5,2,3,0,0),
     (10,2,1,1,0),
     (20,3,1,2,0),
@@ -108,11 +104,24 @@ class Game(var healtPoints : Int, var startingCoins : Int = 300) {
       paused = true
     }
 
+
+  }
+  def restart() =  {
+    currentRound = 0
+    coins = startingCoins
+    healtPoints = startingHealt
+    enemies.clear()
+    towers.clear()
+    paused = false
+    gameOver = false
   }
   def update(g : Graphics2D) = {
     towers.foreach(_.draw(g))
     enemies.foreach(p => p.draw(g))
     rangeRadius = selectedTowerType("range")
+    if(healtPoints <= 0) {
+      gameOver = true
+    }
   }
   //torniolio luodaan vasta asetusvaiheessa
   //funktio pitää lisätä tänne
