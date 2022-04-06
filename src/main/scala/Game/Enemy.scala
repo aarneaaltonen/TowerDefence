@@ -10,7 +10,7 @@ import java.awt.{Color, Graphics2D}
  * @param path
  */
 
-class Enemy(var healthPoints : Int, var speed : Int,val path : List[Pos]) {
+class Enemy(var healthPoints : Int, var speed : Int,val path : List[Pos], var coinReward : Int = 10) {
   var position = path.head
   var maxHealth = healthPoints
   private var path_pos = 0
@@ -54,7 +54,7 @@ class Enemy(var healthPoints : Int, var speed : Int,val path : List[Pos]) {
   }
 
   def draw(g : Graphics2D) = {
-    println(healthPoints)
+
     g.setColor(Color.black)
     g.fillOval((position.x-(10/2)).toInt,(position.y-(10/2)).toInt, 10,10)
     var precentage = healthPoints.toDouble / maxHealth.toDouble

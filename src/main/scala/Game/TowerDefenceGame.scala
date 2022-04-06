@@ -27,7 +27,7 @@ class TowerDefenceGame extends SwingApplication {
 
 
 
-  val fontC = new Font("Courier", java.awt.Font.PLAIN, 13)
+  val fontC = new Font("Arial", 0, 15)
   var mouseXPos = 0
   var mouseYPos = 0
 
@@ -103,9 +103,19 @@ class TowerDefenceGame extends SwingApplication {
   }
 
   // stats shows hp, money, current round and points
+  var coinCounter = new Label {
+    text = "0"
+    font = fontC
+  }
 
-  val stats = new Panel {
+
+
+
+
+  val stats = new GridPanel(1,1) {
     background = new Color(240,240,155)
+    contents += new Label("Coins:")
+    contents += coinCounter
 
   }
 
@@ -156,17 +166,21 @@ class TowerDefenceGame extends SwingApplication {
       case ButtonClicked(b) => {
         if (b == towerButton1) {
           println("1")
+          peli.selectMinigun()
           peli.selectTower()
 
+          repaint()
           // val torni = new Tower(123123123)
           // if peli.money > torni.cost
           // peli.selectTower(torni)
           // else console.text = not enough money y'ä'ä
-
-
         }
         if (b == towerButton2) {
           println("2")
+          peli.selectCannon()
+          peli.selectTower()
+
+          repaint()
         }
         if (b == nextRoundButton) {
           if (peli.paused) {
@@ -195,11 +209,25 @@ class TowerDefenceGame extends SwingApplication {
         case scala.swing.event.MousePressed(src, point, _, _, _) => {
           if (src == arena) {
             if (peli.selected) {
-              peli.placeTower(new Tower(10, new Pos(point.x, point.y), 300))
-              peli.unselectTower()
-              repaint()
-            } else if(peli.towers.forall(p => !p.isSelected)) {
-            peli.towers.foreach(p => if(new Pos(point.x, point.y).distance(p.position)< p.r) p.selectTower())
+              if(peli.coins >= peli.selectedTowerType("cost")) {
+                if (peli.selectedTowerType == peli.minigun) {
+                  peli.placeTower(new MinigunTower(new Pos(point.x, point.y)))
+                } else if (peli.selectedTowerType == peli.cannon) {
+                  peli.placeTower(new CannonTower(new Pos(point.x, point.y)))
+                }
+
+                peli.unselectTower()
+                repaint()
+                peli.coins -= 50
+                coinCounter.text = peli.coins.toString
+              } else {
+                console.text = "not enough money"
+                peli.unselectTower()
+                repaint()
+              }
+            } else if(peli.towers.forall(p => !p.isSelected)) { // if no towers are selected
+              //select the one that was pressed
+            peli.towers.foreach(p => if(new Pos(point.x, point.y).distance(p.position)< (p.r)/2) p.selectTower())
               repaint()
             } else  {
               peli.towers.foreach(_.unselectTower())
@@ -207,7 +235,7 @@ class TowerDefenceGame extends SwingApplication {
             }
 
           }
-          console.text = point.x.toString
+
 
         }
       }
@@ -215,6 +243,9 @@ class TowerDefenceGame extends SwingApplication {
       def actionPerformed(e : java.awt.event.ActionEvent) = {
         if (!peli.paused) {
           peli.step()
+
+          coinCounter.text = peli.coins.toString
+
           repaint()
         }
       }
@@ -223,6 +254,7 @@ class TowerDefenceGame extends SwingApplication {
 
     val timer = new javax.swing.Timer(6, listener)
     timer.start()
+
 
 
 

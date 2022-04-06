@@ -3,11 +3,11 @@ import java.awt.{Color, Graphics2D}
 import scala.collection.mutable.Buffer
 import scala.util.Random
 
-class Game(var healtPoints : Int) {
+class Game(var healtPoints : Int, var startingCoins : Int = 300) {
 
-  var type1Radius = 200
 
-  var coins = 0
+
+  var coins = startingCoins
 
   var paused = false
 
@@ -38,15 +38,21 @@ class Game(var healtPoints : Int) {
 
   /**
    *List rounds houses the amount of different types of enemies per round on corresponding index
+   * first one has to be empty
    *  */
-  var rounds = List[(Int, Int, Int, Int)](
-    (2,1,0,0),
-    (3,2,0,0),
-    (5,2,1,2),
-    (10,2,1,2),
-    (20,3,1,2),
-    (30,2,1,2),
-    (40,2,1,2),
+  var rounds = List[(Int, Int, Int, Int, Int)](
+    (0,0,0,0,0),
+    (3,2,0,0,0),
+    (5,2,3,1,0),
+    (10,2,1,2,0),
+    (20,3,1,2,0),
+    (30,2,1,2,0),
+    (40,2,1,2,0),
+    (80,2,1,2,0),
+    (40,30,1,2,0),
+    (40,2,30,2,0),
+    (100,10,10,10,0),
+    (0,0,0,0,1)
 
 
   )
@@ -56,9 +62,11 @@ class Game(var healtPoints : Int) {
 
     (1 to rounds(currentRound)._2).foreach(p => addEnemy(new Enemy(30, 5, enemyPath))) // second has lower hp but is faster
 
-    (1 to rounds(currentRound)._2).foreach(p => addEnemy(new Enemy(100, 4, enemyPath))) // third one tanky
+    (1 to rounds(currentRound)._3).foreach(p => addEnemy(new Enemy(100, 4, enemyPath))) // third one tanky
 
-    (1 to rounds(currentRound)._2).foreach(p => addEnemy(new Enemy(5, 20, enemyPath))) // fouth enemytype a nimble one
+    (1 to rounds(currentRound)._4).foreach(p => addEnemy(new Enemy(5, 20, enemyPath))) // fouth enemytype a nimble one
+
+    (1 to rounds(currentRound)._5).foreach(p => addEnemy(new Enemy(8000, 4, enemyPath))) // a boss of sorts
 
 
   }
@@ -68,12 +76,20 @@ class Game(var healtPoints : Int) {
   def selectTower() = towerSelected = true
   def unselectTower() = towerSelected = false
   def selected = towerSelected
+  var minigun = Map("Damage" -> 10, "range" -> 300, "cost" -> 50)
+  var cannon = Map("Damage" -> 50, "range" -> 120, "cost" -> 80)
+  def selectCannon() = selectedTowerType = cannon
+  def selectMinigun() = selectedTowerType = minigun
+  var selectedTowerType = minigun
+  var rangeRadius = selectedTowerType("range")
 
 
 
   def placeTower(torni : Tower) : Unit = {
     towers += torni
   }
+
+
 
   def addEnemy(enemy : Enemy) = {
     enemies += enemy
@@ -84,31 +100,37 @@ class Game(var healtPoints : Int) {
     currentRound += 1
     paused = false
     createEnemies()
+    println(currentRound)
   }
   def step() = {
     enemies.foreach(_.move())
     towers.foreach(_.attack(enemies))
     var toBeDeleted = Buffer[Enemy]()
     enemies.foreach(p => if (p.healthPoints <= 0) toBeDeleted += p)
+    toBeDeleted.foreach(p => coins += p.coinReward)
     enemies --= toBeDeleted
     if(enemies.isEmpty) {
       paused = true
 
     }
+
+
   }
 
   def update(g : Graphics2D) = {
     towers.foreach(_.draw(g))
-    enemies.foreach(_.draw(g))
+    enemies.foreach(p => p.draw(g))
+    rangeRadius = selectedTowerType("range")
   }
+
+  //torniolio luodaan vasta asetusvaiheessa
+  //funktio pitää lisätä tänne
   def drawOnMouse(g : Graphics2D, x : Int, y : Int) = {
     var r = 50
-    g.setColor(Color.orange)
+    g.setColor(Color.white)
     g.fillRoundRect((x-(r/2)),(y-(r/2)), r, r, r , r)
+
     g.setColor(new Color(1f,0f,0f,.5f))
-    g.fillRoundRect((x-(type1Radius/2)),(y-(type1Radius/2)), type1Radius, type1Radius, type1Radius , type1Radius)
+    g.fillRoundRect((x-(rangeRadius / 2)),(y-(rangeRadius/2)), rangeRadius, rangeRadius, rangeRadius , rangeRadius)
   }
-
-
-
 }
