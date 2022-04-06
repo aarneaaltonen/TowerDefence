@@ -4,7 +4,7 @@ import java.awt.{Color, Graphics2D}
 import scala.collection.mutable.Buffer
 import scala.util.Random
 
-class Game(var startingHealt : Int, var startingCoins : Int = 300) {
+class Game(var startingHealt : Int, var startingCoins : Int = 250) {
 
   var coins = startingCoins
   var healtPoints = startingHealt
@@ -40,17 +40,17 @@ class Game(var startingHealt : Int, var startingCoins : Int = 300) {
    *  */
   var rounds = List[(Int, Int, Int, Int, Int)](
     (0,0,0,0,0),
-    (0,0,0,30,0),
-    (5,2,3,0,0),
-    (10,2,1,1,0),
-    (20,3,1,2,0),
+    (3,0,0,0,0),
+    (5,2,0,0,0),
+    (10,2,1,0,0),
+    (20,3,1,1,0),
     (30,2,1,2,0),
     (40,2,1,2,0),
     (80,2,1,2,0),
     (40,30,1,2,0),
     (40,2,30,2,0),
     (100,10,10,10,0),
-    (0,0,0,0,1)
+    (200,100,50,20,0)
   )
   def createEnemies(): Unit = {
     //The number of enemies affects the pace in which enemies are created
@@ -70,8 +70,10 @@ class Game(var startingHealt : Int, var startingCoins : Int = 300) {
   def selected = towerSelected
   var minigun = Map("Damage" -> 10, "range" -> 300, "cost" -> 50)
   var cannon = Map("Damage" -> 50, "range" -> 120, "cost" -> 80)
+  var rocketLauncher = Map("Damage" -> 50, "range" -> 500, "cost" -> 250)
   def selectCannon() = selectedTowerType = cannon
   def selectMinigun() = selectedTowerType = minigun
+  def selectRocketLauncher() = selectedTowerType = rocketLauncher
   var selectedTowerType = minigun
   var rangeRadius = selectedTowerType("range")
   def placeTower(torni : Tower) : Unit = {
@@ -88,7 +90,7 @@ class Game(var startingHealt : Int, var startingCoins : Int = 300) {
     currentRound += 1
     paused = false
     createEnemies()
-    println(currentRound)
+
   }
   def step() = {
     enemies.foreach(_.move())
@@ -125,11 +127,14 @@ class Game(var startingHealt : Int, var startingCoins : Int = 300) {
   }
   //torniolio luodaan vasta asetusvaiheessa
   //funktio pitää lisätä tänne
-  def drawOnMouse(g : Graphics2D, x : Int, y : Int) = {
+  def drawOnMouse(g : Graphics2D, x : Int, y : Int, isPlacable : Boolean) = {
     var r = 50
     g.setColor(Color.white)
     g.fillRoundRect((x-(r/2)),(y-(r/2)), r, r, r , r)
     g.setColor(new Color(1f,0f,0f,.5f))
+    if (isPlacable) {
+      g.setColor(new Color(0f,1f,0f,.3f))
+    }
     g.fillRoundRect((x-(rangeRadius / 2)),(y-(rangeRadius/2)), rangeRadius, rangeRadius, rangeRadius , rangeRadius)
   }
 }

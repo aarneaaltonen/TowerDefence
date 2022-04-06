@@ -5,8 +5,7 @@ import scalafx.geometry.Orientation.Horizontal
 import java.awt
 import java.awt.event.ActionListener
 import java.awt.{BasicStroke, Color, Dimension, Font, GradientPaint, Graphics2D, Paint, RenderingHints}
-
-import java.awt.geom.{Ellipse2D, GeneralPath, Path2D}
+import java.awt.geom.{AffineTransform, Ellipse2D, GeneralPath, Path2D}
 import scala.swing._
 import scala.swing.event.ButtonClicked
 
@@ -25,49 +24,34 @@ class TowerDefenceGame extends SwingApplication {
 
 
 
-  val fontC = new Font("Arial", 0, 15)
+  val fontC = new Font("Serif", Font.BOLD, 15)
   var mouseXPos = 0
   var mouseYPos = 0
+  var isPlaceable = false
 
-    val prgtext = new TextArea {
-    background = new Color(250, 250, 250)
-    text = "yo"
-    columns = 58
-    rows = 15
-    font = fontC
-  }
 
   def drawMap(path : List[Pos]) = {
-    val polyline = new GeneralPath(Path2D.WIND_NON_ZERO, 10)
+    val polyline = new GeneralPath(Path2D.WIND_NON_ZERO, 30)
     polyline.moveTo(path.head.x, path.head.y)
     for (positio <- path) {
       polyline.lineTo(positio.x,positio.y)
     }
-
-
-
     polyline
   }
 
 
   val arena = new Panel {
 
-    background = new Color(255,132, 132)
     override def paintComponent(g: Graphics2D): Unit = {
 
       g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-      g.setStroke(new BasicStroke(15))
-
-
       g.setColor(Color.CYAN)
-
+      g.setStroke(new BasicStroke(30))
       g.draw(drawMap(peli.enemyPath))
       if (peli.selected) {
-        peli.drawOnMouse(g, mouseXPos, mouseYPos)
+        peli.drawOnMouse(g, mouseXPos, mouseYPos, isPlaceable)
       }
-
       peli.update(g)
-
     }
   }
 
@@ -174,6 +158,7 @@ class TowerDefenceGame extends SwingApplication {
     listenTo(arena.mouse.moves)
     listenTo(towerButton1)
     listenTo(towerButton2)
+    listenTo(towerButton3)
     listenTo(nextRoundButton)
 
     //react to button clicks
@@ -192,6 +177,12 @@ class TowerDefenceGame extends SwingApplication {
           console.text = "Cannon Costs 80 Coins \n Place Down To Buy, Right Click To Cancel"
           repaint()
         }
+        if(b == towerButton3) {
+          peli.selectRocketLauncher()
+          peli.selectTower()
+          console.text = "Rocket launcher Costs 250 Coins \n Place Down To Buy, Right Click To Cancel"
+          repaint()
+        }
         if (b == nextRoundButton) {
           if (peli.paused) {
             peli.advanceRound()
@@ -204,6 +195,16 @@ class TowerDefenceGame extends SwingApplication {
     reactions += {
       case scala.swing.event.MouseMoved(src, point, k) => {
         if (peli.selected) {
+          //cant place new tower on top of another tower
+          if (peli.towers.forall(p => new Pos(point.x, point.y).distance(p.position)> p.r)) {
+            isPlaceable = true
+            // cant place tower on enemy path
+            if (new BasicStroke(3).createStrokedShape(drawMap(peli.enemyPath)).intersects(point.x-30, point.y-30, 60, 60)) {
+              isPlaceable = false
+            }
+          } else isPlaceable = false
+          drawMap(peli.enemyPath)
+
           mouseXPos = point.x
           mouseYPos = point.y
           repaint()
@@ -220,22 +221,26 @@ class TowerDefenceGame extends SwingApplication {
               if(peli.coins >= peli.selectedTowerType("cost")) {
                 //if enough money, left mouse button places selected tower and removes cost from coins
                 if (d == 1024) {
-                  if (peli.selectedTowerType == peli.minigun) {
-                    peli.placeTower(new MinigunTower(new Pos(point.x, point.y)))
-                  } else if (peli.selectedTowerType == peli.cannon) {
-                    peli.placeTower(new CannonTower(new Pos(point.x, point.y)))
+                  if (isPlaceable) {
 
+                    if (peli.selectedTowerType == peli.minigun) {
+                      peli.placeTower(new MinigunTower(new Pos(point.x, point.y)))
+                    } else if (peli.selectedTowerType == peli.cannon) {
+                      peli.placeTower(new CannonTower(new Pos(point.x, point.y)))
+                    } else if (peli.selectedTowerType == peli.rocketLauncher) {
+                      peli.placeTower(new RocketLauncher(new Pos(point.x, point.y)))
+                    }
+
+                  peli.unselectTower()
+                  repaint()
+                  peli.coins -= peli.selectedTowerType("cost")
+                  coinCounter.text = peli.coins.toString
                   }
-
-                peli.unselectTower()
-                repaint()
-                peli.coins -= 50
-                coinCounter.text = peli.coins.toString
+                } else if (d == 4096) {
+                  peli.unselectTower()
                 }
 
-                peli.unselectTower()
                 repaint()
-
               } else {
                 console.text = "not enough money"
                 peli.unselectTower()
@@ -271,7 +276,6 @@ class TowerDefenceGame extends SwingApplication {
 
       }
     }
-
     val timer = new javax.swing.Timer(6, listener)
     timer.start()
 

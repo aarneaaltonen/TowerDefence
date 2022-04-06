@@ -18,8 +18,7 @@ class MinigunTower( position : Pos) extends Tower(2, position, 300, 50, 10){
     g.setColor(Color.orange)
     g.fillRoundRect((position.x-(r/2)).toInt,(position.y-(r/2)).toInt, r, r, r , r)
     if (isSelected) {
-      g.setColor(new Color(1f,0f,0f,.5f))
-
+      g.setColor(new Color(0f,1f,0f,.3f))
       g.fillRoundRect((position.x-(range/2)).toInt,(position.y-(range/2)).toInt, range, range, range , range)
     }
   }
