@@ -1,4 +1,5 @@
 package Game
+
 import java.awt.{Color, Graphics2D}
 import scala.collection.mutable.Buffer
 import scala.util.Random
@@ -16,7 +17,8 @@ class Game(var healtPoints : Int, var startingCoins : Int = 300) {
 
   var currentRound = 0
 
-  val enemyPath : List[(Pos)] = List(     new Pos(27,75),
+  val enemyPath : List[(Pos)] = List(
+                                          new Pos(-100,75),
                                           new Pos(159,77),
                                           new Pos(202,154),
                                           new Pos(320,157),
@@ -33,7 +35,7 @@ class Game(var healtPoints : Int, var startingCoins : Int = 300) {
                                           new Pos(556,614),
                                           new Pos(744,578),
                                           new Pos(752,395),
-                                          new Pos(875,400),
+                                          new Pos(950,400),
 )
 
   /**
@@ -42,9 +44,9 @@ class Game(var healtPoints : Int, var startingCoins : Int = 300) {
    *  */
   var rounds = List[(Int, Int, Int, Int, Int)](
     (0,0,0,0,0),
-    (3,2,0,0,0),
-    (5,2,3,1,0),
-    (10,2,1,2,0),
+    (0,0,0,5,0),
+    (5,2,3,0,0),
+    (10,2,1,1,0),
     (20,3,1,2,0),
     (30,2,1,2,0),
     (40,2,1,2,0),
@@ -53,25 +55,19 @@ class Game(var healtPoints : Int, var startingCoins : Int = 300) {
     (40,2,30,2,0),
     (100,10,10,10,0),
     (0,0,0,0,1)
-
-
   )
-
   def createEnemies(): Unit = {
-    (1 to rounds(currentRound)._1).foreach(p => addEnemy(new Enemy(50, 3, enemyPath))) // make first enemytype slow
+    //The number of enemies affects the pace in which enemies are created
+    (1 to rounds(currentRound)._1).foreach(p => addEnemy(new FirstEnemy(enemyPath), 100/rounds(currentRound)._1)) // make first enemytype slow
 
-    (1 to rounds(currentRound)._2).foreach(p => addEnemy(new Enemy(30, 5, enemyPath))) // second has lower hp but is faster
+    (1 to rounds(currentRound)._2).foreach(p => addEnemy(new SecondEnemy(enemyPath), 50/rounds(currentRound)._2)) // second has lower hp but is faster
 
-    (1 to rounds(currentRound)._3).foreach(p => addEnemy(new Enemy(100, 4, enemyPath))) // third one tanky
+    (1 to rounds(currentRound)._3).foreach(p => addEnemy(new ThirdEnemy(enemyPath), 50/rounds(currentRound)._3)) // third one tanky
 
-    (1 to rounds(currentRound)._4).foreach(p => addEnemy(new Enemy(5, 20, enemyPath))) // fouth enemytype a nimble one
+    (1 to rounds(currentRound)._4).foreach(p => addEnemy(new FourthEnemy(enemyPath), 2)) // fouth enemytype a nimble one
 
-    (1 to rounds(currentRound)._5).foreach(p => addEnemy(new Enemy(8000, 4, enemyPath))) // a boss of sorts
-
-
+    //(1 to rounds(currentRound)._5).foreach(p => addEnemy(new Enemy(5000, 4, enemyPath, 1000), 1)) // a boss of sorts
   }
-
-
   private var towerSelected = false
   def selectTower() = towerSelected = true
   def unselectTower() = towerSelected = false
@@ -82,19 +78,15 @@ class Game(var healtPoints : Int, var startingCoins : Int = 300) {
   def selectMinigun() = selectedTowerType = minigun
   var selectedTowerType = minigun
   var rangeRadius = selectedTowerType("range")
-
-
-
   def placeTower(torni : Tower) : Unit = {
     towers += torni
   }
-
-
-
-  def addEnemy(enemy : Enemy) = {
+  //addEnemy adds inputted enemy to game and waits waitTime amount of steps.
+  def addEnemy(enemy : Enemy, waitTime : Int) = {
     enemies += enemy
-    (1 to 20).foreach(p => step())
+    (1 to waitTime).foreach(p => step())
   }
+
 
   def advanceRound() = {
     currentRound += 1
@@ -108,28 +100,26 @@ class Game(var healtPoints : Int, var startingCoins : Int = 300) {
     var toBeDeleted = Buffer[Enemy]()
     enemies.foreach(p => if (p.healthPoints <= 0) toBeDeleted += p)
     toBeDeleted.foreach(p => coins += p.coinReward)
+    enemies.foreach(p => if (p.reachedEnd) healtPoints -= 1)
+    enemies.foreach(p => if (p.reachedEnd) toBeDeleted += p)
     enemies --= toBeDeleted
+
     if(enemies.isEmpty) {
       paused = true
-
     }
 
-
   }
-
   def update(g : Graphics2D) = {
     towers.foreach(_.draw(g))
     enemies.foreach(p => p.draw(g))
     rangeRadius = selectedTowerType("range")
   }
-
   //torniolio luodaan vasta asetusvaiheessa
   //funktio pitää lisätä tänne
   def drawOnMouse(g : Graphics2D, x : Int, y : Int) = {
     var r = 50
     g.setColor(Color.white)
     g.fillRoundRect((x-(r/2)),(y-(r/2)), r, r, r , r)
-
     g.setColor(new Color(1f,0f,0f,.5f))
     g.fillRoundRect((x-(rangeRadius / 2)),(y-(rangeRadius/2)), rangeRadius, rangeRadius, rangeRadius , rangeRadius)
   }

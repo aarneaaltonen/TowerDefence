@@ -10,19 +10,24 @@ import java.awt.{Color, Graphics2D}
  * @param path
  */
 
-class Enemy(var healthPoints : Int, var speed : Int,val path : List[Pos], var coinReward : Int = 10) {
+abstract class Enemy(var healthPoints : Int, var speed : Int,val path : List[Pos], var coinReward : Int) {
   var position = path.head
   var maxHealth = healthPoints
   private var path_pos = 0
   private var move_count = 0.0
   private var move_dis = 0
-  private var dis : Double = 0
+  var reachedEnd = false
+
 
   def move() = {
 
-    //algorithm copied from techWithTim
+
     var pos1 = path(path_pos) //viimeinen Pos
-    var pos2 = path(path_pos +1)
+
+    if (path_pos  >= path.length -1) {
+      reachedEnd = true
+    }
+    var pos2 = path((path_pos +1) % path.length)
 
     var dirn = (pos2 - pos1)
     val length = math.sqrt(math.pow(dirn.x,2) + math.pow(dirn.y,2))
@@ -53,15 +58,8 @@ class Enemy(var healthPoints : Int, var speed : Int,val path : List[Pos], var co
     }
   }
 
-  def draw(g : Graphics2D) = {
+  def draw(g : Graphics2D) : Unit
 
-    g.setColor(Color.black)
-    g.fillOval((position.x-(10/2)).toInt,(position.y-(10/2)).toInt, 10,10)
-    var precentage = healthPoints.toDouble / maxHealth.toDouble
-    g.setColor(Color.red)
-    g.fillRect((position.x-(10/2)).toInt, (position.y-(20)).toInt, (precentage*10).toInt, 5)
-
-  }
   def takeDamage(amount : Int) = {
     healthPoints = healthPoints - amount
   }

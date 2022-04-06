@@ -77,7 +77,7 @@ class TowerDefenceGame extends SwingApplication {
 
   val arenaWithConsole = new SplitPane(Orientation.Horizontal, arena, console) {}
   arenaWithConsole.dividerSize = 0
-  arenaWithConsole.dividerLocation = 700
+  arenaWithConsole.dividerLocation = 650
 
   // create buttons to buy towers
 
@@ -98,8 +98,6 @@ class TowerDefenceGame extends SwingApplication {
     contents += towerButton3
     contents += nextRoundButton
 
-
-
   }
 
   // stats shows hp, money, current round and points
@@ -107,15 +105,23 @@ class TowerDefenceGame extends SwingApplication {
     text = "0"
     font = fontC
   }
+  var roundIndicator = new Label {
+    text = "0"
+    font = fontC
+  }
+  var healtPointIndicator = new Label {
+    text = "0"
+    font = fontC
+  }
 
-
-
-
-
-  val stats = new GridPanel(1,1) {
+  val stats = new GridPanel(3,2) {
     background = new Color(240,240,155)
     contents += new Label("Coins:")
     contents += coinCounter
+    contents += new Label("Round:")
+    contents += roundIndicator
+    contents += new Label("Health:")
+    contents += healtPointIndicator
 
   }
 
@@ -148,12 +154,9 @@ class TowerDefenceGame extends SwingApplication {
     menuBar = new MenuBar{
       contents += new Menu("testi") {
         contents += new MenuItem("New Game")
-
       }
     }
     contents = gms
-
-
     listenTo(arena.mouse.clicks)
     listenTo(arena.mouse.moves)
     listenTo(towerButton1)
@@ -165,33 +168,26 @@ class TowerDefenceGame extends SwingApplication {
     reactions += {
       case ButtonClicked(b) => {
         if (b == towerButton1) {
-          println("1")
           peli.selectMinigun()
           peli.selectTower()
-
+          console.text = "Minigun Costs 50 Coins. \n Place Down To Buy, Right Click To Cancel"
           repaint()
-          // val torni = new Tower(123123123)
-          // if peli.money > torni.cost
-          // peli.selectTower(torni)
-          // else console.text = not enough money y'ä'ä
         }
         if (b == towerButton2) {
-          println("2")
           peli.selectCannon()
           peli.selectTower()
-
+          console.text = "Cannon Costs 80 Coins \n Place Down To Buy, Right Click To Cancel"
           repaint()
         }
         if (b == nextRoundButton) {
           if (peli.paused) {
             peli.advanceRound()
+            console.text = "Round " + peli.currentRound + " Started"
           }
         }
       }
     }
-
     // react to mouse movement on map if a tower has been selected
-
     reactions += {
       case scala.swing.event.MouseMoved(src, point, k) => {
         if (peli.selected) {
@@ -201,25 +197,32 @@ class TowerDefenceGame extends SwingApplication {
         }
       }
     }
-
     // react to clicks on map
     // if tower has been selected. It creates new tower to point.x, point.y
 
     reactions += {
-        case scala.swing.event.MousePressed(src, point, _, _, _) => {
+        case scala.swing.event.MousePressed(src, point, d, _, _) => {
           if (src == arena) {
             if (peli.selected) {
               if(peli.coins >= peli.selectedTowerType("cost")) {
-                if (peli.selectedTowerType == peli.minigun) {
-                  peli.placeTower(new MinigunTower(new Pos(point.x, point.y)))
-                } else if (peli.selectedTowerType == peli.cannon) {
-                  peli.placeTower(new CannonTower(new Pos(point.x, point.y)))
-                }
+                //if enough money, left mouse button places selected tower and removes cost from coins
+                if (d == 1024) {
+                  if (peli.selectedTowerType == peli.minigun) {
+                    peli.placeTower(new MinigunTower(new Pos(point.x, point.y)))
+                  } else if (peli.selectedTowerType == peli.cannon) {
+                    peli.placeTower(new CannonTower(new Pos(point.x, point.y)))
+
+                  }
 
                 peli.unselectTower()
                 repaint()
                 peli.coins -= 50
                 coinCounter.text = peli.coins.toString
+                }
+
+                peli.unselectTower()
+                repaint()
+
               } else {
                 console.text = "not enough money"
                 peli.unselectTower()
@@ -233,10 +236,7 @@ class TowerDefenceGame extends SwingApplication {
               peli.towers.foreach(_.unselectTower())
               repaint()
             }
-
           }
-
-
         }
       }
     val listener = new ActionListener(){
@@ -245,30 +245,17 @@ class TowerDefenceGame extends SwingApplication {
           peli.step()
 
           coinCounter.text = peli.coins.toString
+          roundIndicator.text  = peli.currentRound.toString
+          healtPointIndicator.text = peli.healtPoints.toString
 
           repaint()
         }
       }
     }
-
-
     val timer = new javax.swing.Timer(6, listener)
     timer.start()
-
-
-
-
-
   }
-
-
-
-
-
   val t = top
   t.centerOnScreen()
   t.visible = true
-
-
-
 }
