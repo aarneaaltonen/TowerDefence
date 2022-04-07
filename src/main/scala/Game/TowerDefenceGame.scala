@@ -80,6 +80,9 @@ class TowerDefenceGame extends SwingApplication {
   val towerButton3 = new Button("Rocket Launcher") {
     font= fontC
   }
+  val towerButton4 = new Button("Flamethrower") {
+    font = fontC
+  }
 
   val nextRoundButton = new Button("Next Round") {
     foreground = new Color(120, 120, 50)
@@ -92,6 +95,7 @@ class TowerDefenceGame extends SwingApplication {
     contents += towerButton1
     contents += towerButton2
     contents += towerButton3
+    contents += towerButton4
     contents += nextRoundButton
 
   }
@@ -187,6 +191,7 @@ class TowerDefenceGame extends SwingApplication {
     listenTo(towerButton1)
     listenTo(towerButton2)
     listenTo(towerButton3)
+    listenTo(towerButton4)
     listenTo(nextRoundButton)
     listenTo(upgradeButton)
 
@@ -210,6 +215,12 @@ class TowerDefenceGame extends SwingApplication {
           peli.selectRocketLauncher()
           peli.selectTower()
           console.text = "Rocket launcher Costs 250 Coins \n Place Down To Buy, Right Click To Cancel"
+          repaint()
+        }
+        if(b== towerButton4) {
+          peli.selectFlamethrower()
+          peli.selectTower()
+          console.text = "Flamethrower Costs 1500 Coins\n Attacks all enemies in range \n Place Down To Buy, Right Click To Cancel"
           repaint()
         }
         if (b == nextRoundButton) {
@@ -269,6 +280,8 @@ class TowerDefenceGame extends SwingApplication {
                       peli.placeTower(new CannonTower(new Pos(point.x, point.y)))
                     } else if (peli.selectedTowerType == peli.rocketLauncher) {
                       peli.placeTower(new RocketLauncher(new Pos(point.x, point.y)))
+                    } else if (peli.selectedTowerType == peli.flamethrower) {
+                      peli.placeTower(new Flamethrower(new Pos(point.x, point.y)))
                     }
 
                   peli.unselectTower()

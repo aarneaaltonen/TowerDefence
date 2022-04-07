@@ -4,14 +4,14 @@ import java.awt.{Color, Graphics2D}
 import scala.collection.mutable.Buffer
 import scala.util.Random
 
-class Game(var startingHealt : Int, var startingCoins : Int = 150) {
+class Game(var startingHealt : Int, var startingCoins : Int = 1500) {
 
   var coins = startingCoins
   var healtPoints = startingHealt
   var paused = false
   var towers = Buffer[Tower]()
   var enemies = Buffer[Enemy]()
-  var currentRound = 0
+  var currentRound = 3
   var gameOver = false
   val enemyPath : List[(Pos)] = List(
                                           new Pos(-100,75),
@@ -71,9 +71,11 @@ class Game(var startingHealt : Int, var startingCoins : Int = 150) {
   var minigun = Map("Damage" -> 10, "range" -> 300, "cost" -> 50)
   var cannon = Map("Damage" -> 50, "range" -> 120, "cost" -> 80)
   var rocketLauncher = Map("Damage" -> 50, "range" -> 500, "cost" -> 250)
+  var flamethrower = Map("Damage" -> 2, "range" -> 150, "cost" -> 1500)
   def selectCannon() = selectedTowerType = cannon
   def selectMinigun() = selectedTowerType = minigun
   def selectRocketLauncher() = selectedTowerType = rocketLauncher
+  def selectFlamethrower() = selectedTowerType = flamethrower
   var selectedTowerType = minigun
   var rangeRadius = selectedTowerType("range")
   def placeTower(torni : Tower) : Unit = {

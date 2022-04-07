@@ -37,7 +37,6 @@ abstract class Tower(var damage : Int, var position : Pos, var range : Int,var c
         counter = 0
          closestEnemy.head.takeDamage(damage)
         hasTarget = true
-
         targetDirAngle = math.atan2((closestEnemy.head.position.y - position.y),(closestEnemy.head.position.x - position.x))
       } else counter += 1
     } else hasTarget = false
