@@ -11,9 +11,14 @@ abstract class Tower(val damage : Int, var position : Pos, val range : Int, cost
 
   def selectTower() = isSelected = true
   def unselectTower() = isSelected = false
+  var hasTarget = false
 
 
   var counter = 0
+  private var targetDirAngle = math.Pi
+  def getTargetDirAngle = {
+    targetDirAngle
+  }
 
 
   def attack(enemies : mutable.Buffer[Enemy]) = {
@@ -22,7 +27,6 @@ abstract class Tower(val damage : Int, var position : Pos, val range : Int, cost
     for (enemy <- enemies) {
       if (enemy.position.distance(position) < range/2) {
         inRange = true
-
         closestEnemy += enemy
       }
     }
@@ -30,10 +34,11 @@ abstract class Tower(val damage : Int, var position : Pos, val range : Int, cost
       if (counter ==attackSpeed) {
         counter = 0
          closestEnemy.head.takeDamage(damage)
+        hasTarget = true
+
+        targetDirAngle = math.atan2((closestEnemy.head.position.y - position.y),(closestEnemy.head.position.x - position.x))
       } else counter += 1
-
-
-    }
+    } else hasTarget = false
   }
 
 

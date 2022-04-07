@@ -45,7 +45,7 @@ class TowerDefenceGame extends SwingApplication {
     override def paintComponent(g: Graphics2D): Unit = {
 
       g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-      g.setColor(Color.CYAN)
+      g.setColor(new Color(12, 117, 140))
       g.setStroke(new BasicStroke(30))
       g.draw(drawMap(peli.enemyPath))
       if (peli.selected) {
@@ -125,6 +125,7 @@ class TowerDefenceGame extends SwingApplication {
   def restartGame() = {
     peli.restart()
     arena.repaint()
+    console.text = "Started New Game"
   }
 
 

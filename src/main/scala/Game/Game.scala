@@ -104,6 +104,7 @@ class Game(var startingHealt : Int, var startingCoins : Int = 250) {
 
     if(enemies.isEmpty) {
       paused = true
+      towers.foreach(_.hasTarget = false)
     }
 
 
