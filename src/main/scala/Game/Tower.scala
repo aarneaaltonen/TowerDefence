@@ -23,6 +23,8 @@ abstract class Tower(var damage : Int, var position : Pos, var range : Int,var c
   }
 
 
+
+
   def attack(enemies : mutable.Buffer[Enemy]) = {
     var inRange = false
     var closestEnemy = mutable.Buffer[Enemy]()

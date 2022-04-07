@@ -1,8 +1,5 @@
 package Game
 
-
-
-
 import java.awt.event.ActionListener
 import java.awt.{BasicStroke, Color, Dimension, Font, Graphics2D, RenderingHints}
 import java.awt.geom.{ GeneralPath, Path2D}
@@ -132,13 +129,23 @@ class TowerDefenceGame extends SwingApplication {
   rightSide.dividerLocation = 100
 
   val upgradeButton = new Button("Upgrade") {
+    font = fontC
 
   }
 
-  val upgradeMenu = new GridPanel(1,1) {
-    background = new Color(1,100,100)
+  val sellButton = new Button("Sell") {
+    font = fontC
+  }
 
+  val upgradeMenu = new GridPanel(3,1) {
+    background = new Color(1,100,100)
     contents += upgradeButton
+  }
+  def updateUpgradeMenu(p : Tower) = {
+    upgradeMenu.contents += new Label("Upgrade Costs: "+ p.upgradeCost + " Coins")
+    upgradeMenu.contents += upgradeButton
+    upgradeMenu.contents += sellButton
+
   }
   upgradeButton.visible = false
 
@@ -194,6 +201,7 @@ class TowerDefenceGame extends SwingApplication {
     listenTo(towerButton4)
     listenTo(nextRoundButton)
     listenTo(upgradeButton)
+    listenTo(sellButton)
 
     //react to button clicks
 
@@ -240,6 +248,18 @@ class TowerDefenceGame extends SwingApplication {
             } else console.text = "Not Enough Coins To Upgrade"
           })
         }
+        if(b == sellButton) {
+          peli.towers.foreach(p => if (p.isSelected) {
+            peli.sell(p)
+            console.text = "Sold For " + (p.cost / 2) + " Coins"
+          })
+          peli.towers --= peli.toBeDeleted
+          upgradeMenu.contents.clear()
+          upgradeButton.visible = false
+          peli.towers.foreach(_.unselectTower())
+          coinCounter.text = peli.coins.toString
+          repaint()
+        }
       }
     }
     // react to mouse movement on map if a tower has been selected
@@ -273,7 +293,6 @@ class TowerDefenceGame extends SwingApplication {
                 //if enough money, left mouse button places selected tower and removes cost from coins
                 if (d == 1024) {
                   if (isPlaceable) {
-
                     if (peli.selectedTowerType == peli.minigun) {
                       peli.placeTower(new MinigunTower(new Pos(point.x, point.y)))
                     } else if (peli.selectedTowerType == peli.cannon) {
@@ -283,7 +302,6 @@ class TowerDefenceGame extends SwingApplication {
                     } else if (peli.selectedTowerType == peli.flamethrower) {
                       peli.placeTower(new Flamethrower(new Pos(point.x, point.y)))
                     }
-
                   peli.unselectTower()
                   repaint()
                   peli.coins -= peli.selectedTowerType("cost")
@@ -303,13 +321,13 @@ class TowerDefenceGame extends SwingApplication {
               //select the one that was pressed
               peli.towers.foreach(p => if(new Pos(point.x, point.y).distance(p.position)< (p.r)/2) {
                 p.selectTower()
-                upgradeMenu.contents += new Label("Upgrade Costs: " + p.upgradeCost)
+                console.text = "Sell For " + (p.cost/2)+" Coins \n Upgrading Costs " + p.upgradeCost + " Coins"
+                updateUpgradeMenu(p)
                 upgradeButton.visible = true
               })
               repaint()
-            } else  {
+            } else {
               upgradeMenu.contents.clear()
-              upgradeMenu.contents += upgradeButton
               upgradeButton.visible = false
               peli.towers.foreach(_.unselectTower())
               repaint()

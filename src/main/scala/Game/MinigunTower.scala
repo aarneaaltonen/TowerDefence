@@ -43,8 +43,9 @@ class MinigunTower( position : Pos) extends Tower(2, position, 300, 50, 10){
   }
 
   override def upgrade(): Unit = {
-    damage += 20
-    range += 50
+    damage = 5
+    range = 400
+    attackSpeed = 4
   }
 
 

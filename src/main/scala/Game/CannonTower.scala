@@ -30,9 +30,9 @@ class CannonTower(position : Pos) extends Tower(50, position, 120, 70, 80) {
   }
 
   override def upgrade() = {
-    damage += 20
-    range += 100
-    attackSpeed = 50
+    damage = 100
+    range = 200
+    attackSpeed = 70
   }
 
 

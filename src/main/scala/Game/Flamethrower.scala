@@ -48,6 +48,7 @@ class Flamethrower(position : Pos) extends Tower(2, position, 150, 1500, 8) {
 
   override def upgrade(): Unit = {
     damage = 4
+    range = 250
   }
 
   def draw(g : Graphics2D) = {
