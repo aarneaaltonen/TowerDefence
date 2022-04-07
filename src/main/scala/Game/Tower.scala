@@ -8,6 +8,7 @@ abstract class Tower(var damage : Int, var position : Pos, var range : Int,var c
   //every tower has radius of r = 50 (for now)
   var r = 50
   var isSelected = false
+  var upgraded = false
 
   var upgradeCost : Int
 
@@ -43,9 +44,7 @@ abstract class Tower(var damage : Int, var position : Pos, var range : Int,var c
       } else counter += 1
     } else hasTarget = false
   }
-  def upgrade() = {
-    this.range += 50
-  }
+  def upgrade() :Unit
 
 
 

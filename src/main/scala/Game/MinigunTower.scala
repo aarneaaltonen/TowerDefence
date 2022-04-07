@@ -1,6 +1,7 @@
 package Game
 
-import java.awt.{Color, Graphics2D}
+import java.awt.geom.Ellipse2D
+import java.awt.{BasicStroke, Color, Graphics2D}
 
 /**
  * MinigunTower is a tower with fixed parameters for damage, range, cost and attackspeed
@@ -46,12 +47,18 @@ class MinigunTower( position : Pos) extends Tower(2, position, 300, 50, 10){
     damage = 5
     range = 400
     attackSpeed = 4
+    upgraded = true
   }
 
 
   def draw(g : Graphics2D) = {
     g.setColor(Color.orange)
     g.fillRoundRect((position.x-(r/2)).toInt,(position.y-(r/2)).toInt, r, r, r , r)
+    if(upgraded) {
+      g.setColor(new Color(162, 138, 80))
+      g.setStroke(new BasicStroke(4))
+      g.draw(new Ellipse2D.Double((position.x-(r/2)).toInt,(position.y-(r/2)).toInt,r,r))
+    }
     g.setColor(Color.darkGray)
     drawGun(g)
     if (isSelected) {

@@ -15,11 +15,7 @@ object GameLauncher {
 class TowerDefenceGame extends SwingApplication {
   val peli = new Game(30)
 
-
   peli.createEnemies()
-
-
-
 
   val fontC = new Font("Serif", Font.BOLD, 15)
   var mouseXPos = 0
@@ -240,18 +236,21 @@ class TowerDefenceGame extends SwingApplication {
         if(b ==upgradeButton) {
 
           peli.towers.foreach(p => if (p.isSelected) {
-            if (peli.coins >= p.upgradeCost) {
-            p.upgrade()
-            peli.coins -= p.upgradeCost
-            repaint()
-            coinCounter.text = peli.coins.toString
-            } else console.text = "Not Enough Coins To Upgrade"
+            if(!p.upgraded) {
+              if (peli.coins >= p.upgradeCost) {
+              p.upgrade()
+              peli.coins -= p.upgradeCost
+              repaint()
+              coinCounter.text = peli.coins.toString
+              console.text = "Sell For " + (if(p.upgraded) {(p.cost + p.upgradeCost)/2} else p.cost/2) +" Coins\n" + (if(p.upgraded) "Tier 1"else "Upgrading Costs " + p.upgradeCost + " Coins")
+              } else console.text = "Not Enough Coins To Upgrade"
+            } else console.text = "Already Upgraded"
           })
         }
         if(b == sellButton) {
           peli.towers.foreach(p => if (p.isSelected) {
             peli.sell(p)
-            console.text = "Sold For " + (p.cost / 2) + " Coins"
+            console.text = "Sold For " + (if(p.upgraded) {(p.cost + p.upgradeCost)/2} else p.cost/2) + " Coins"
           })
           peli.towers --= peli.toBeDeleted
           upgradeMenu.contents.clear()
@@ -321,7 +320,7 @@ class TowerDefenceGame extends SwingApplication {
               //select the one that was pressed
               peli.towers.foreach(p => if(new Pos(point.x, point.y).distance(p.position)< (p.r)/2) {
                 p.selectTower()
-                console.text = "Sell For " + (p.cost/2)+" Coins \n Upgrading Costs " + p.upgradeCost + " Coins"
+                console.text = "Sell For " + (if(p.upgraded) {(p.cost + p.upgradeCost)/2} else p.cost/2) +" Coins\n" + (if(p.upgraded) "Tier 1"else "Upgrading Costs " + p.upgradeCost + " Coins")
                 updateUpgradeMenu(p)
                 upgradeButton.visible = true
               })

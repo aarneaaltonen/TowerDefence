@@ -1,7 +1,7 @@
 package Game
 
 import java.awt.geom.{Ellipse2D, Path2D, RoundRectangle2D}
-import java.awt.{Color, Graphics2D}
+import java.awt.{BasicStroke, Color, Graphics2D}
 import scala.collection.mutable
 
 class RocketLauncher(position : Pos) extends Tower(15, position, 500, 250, 60) {
@@ -42,6 +42,7 @@ class RocketLauncher(position : Pos) extends Tower(15, position, 500, 250, 60) {
 
   override def upgrade(): Unit = {
     damage = 50
+    upgraded = true
   }
 
   def draw(g : Graphics2D) = {
@@ -56,6 +57,11 @@ class RocketLauncher(position : Pos) extends Tower(15, position, 500, 250, 60) {
     }
     g.setColor(Color.yellow)
     g.fillRoundRect((position.x-(r/2)).toInt,(position.y-(r/2)).toInt, r, r, r , r)
+    if(upgraded) {
+      g.setColor(new Color(162, 138, 80))
+      g.setStroke(new BasicStroke(4))
+      g.draw(new Ellipse2D.Double((position.x-(r/2)).toInt,(position.y-(r/2)).toInt,r,r))
+    }
     g.setColor(new Color(23))
     drawGun(g)
     if (isSelected) {

@@ -1,6 +1,7 @@
 package Game
 
-import java.awt.{Color, Graphics2D}
+import java.awt.geom.Ellipse2D
+import java.awt.{BasicStroke, Color, Graphics2D}
 import scala.collection.mutable
 
 class Flamethrower(position : Pos) extends Tower(2, position, 150, 1500, 8) {
@@ -49,11 +50,17 @@ class Flamethrower(position : Pos) extends Tower(2, position, 150, 1500, 8) {
   override def upgrade(): Unit = {
     damage = 4
     range = 250
+    upgraded = true
   }
 
   def draw(g : Graphics2D) = {
     g.setColor(new Color(65, 52, 43))
     g.fillRoundRect((position.x-(r/2)).toInt,(position.y-(r/2)).toInt, r, r, r , r)
+    if(upgraded) {
+      g.setColor(new Color(162, 138, 80))
+      g.setStroke(new BasicStroke(4))
+      g.draw(new Ellipse2D.Double((position.x-(r/2)).toInt,(position.y-(r/2)).toInt,r,r))
+    }
 
     drawGun(g)
     if (isSelected) {

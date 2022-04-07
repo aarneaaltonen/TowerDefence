@@ -5,14 +5,14 @@ import java.awt.{Color, Graphics2D}
 import scala.collection.mutable.Buffer
 import scala.util.Random
 
-class Game(var startingHealt : Int, var startingCoins : Int = 250) {
+class Game(var startingHealt : Int, var startingCoins : Int = 10000) {
 
   var coins = startingCoins
   var healtPoints = startingHealt
   var paused = false
   var towers = Buffer[Tower]()
   var enemies = Buffer[Enemy]()
-  var currentRound = 0
+  var currentRound = 20
   var gameOver = false
   val enemyPath : List[(Pos)] = List(
                                           new Pos(-100,75),
@@ -41,34 +41,47 @@ class Game(var startingHealt : Int, var startingCoins : Int = 250) {
    *  */
   var rounds = List[(Int, Int, Int, Int, Int)](
     (0,0,0,0,0),
-    (3,0,0,0,0),
-    (5,2,0,0,0),
-    (10,2,0,0,0),
-    (20,3,1,1,0),
-    (30,2,1,2,0),
-    (40,2,1,2,0),
-    (80,2,1,2,0),
-    (40,30,1,2,0),
-    (40,2,30,2,0),
-    (0,0,0,0,1),
-    (200,50,20,20,0),
-    (200,100,50,20,0),
-    (200,150,50,20,1),
-    (800,100,50,20,0),
-    (1000,100,50,20,5),
-    (1000,100,50,20,10)
+    (3,0,0,0,0), //1
+    (5,2,0,0,0), //2
+    (10,2,0,0,0),//3
+    (20,3,1,1,0),//4
+    (30,2,1,2,0),//5
+    (40,2,1,2,0),//6
+    (80,2,1,2,0),//7
+    (40,30,1,2,0),//8
+    (40,2,20,2,0),//9
+    (0,0,0,0,1),//10
+    (100,50,20,20,0),//11
+    (100,100,50,20,0),//12
+    (200,150,50,20,1),//13
+    (800,100,50,20,0),//14
+    (1000,100,50,20,5),//15
+    (1000,100,50,20,10),//16
+    (1000,100,50,20,10),//17
+    (1000,100,50,20,10),//18
+    (1000,100,50,20,10),//19
+
   )
   def createEnemies(): Unit = {
     //The number of enemies affects the pace in which enemies are created
+    //first 19 rounds are given by list
+    if (currentRound < 20) {
     (1 to rounds(currentRound)._1).foreach(p => addEnemy(new FirstEnemy(enemyPath), 100/rounds(currentRound)._1)) // make first enemytype slow
 
     (1 to rounds(currentRound)._2).foreach(p => addEnemy(new SecondEnemy(enemyPath), 50/rounds(currentRound)._2)) // second has lower hp but is faster
 
     (1 to rounds(currentRound)._3).foreach(p => addEnemy(new ThirdEnemy(enemyPath), 50/rounds(currentRound)._3)) // third one tanky
 
-    (1 to rounds(currentRound)._4).foreach(p => addEnemy(new FourthEnemy(enemyPath), 2)) // fouth enemytype a nimble one
+    (1 to rounds(currentRound)._4).foreach(p => addEnemy(new FourthEnemy(enemyPath), 100/rounds(currentRound)._4)) // fouth enemytype a nimble one
 
-    (1 to rounds(currentRound)._5).foreach(p => addEnemy(new Miniboss(enemyPath), 1)) // a boss of sorts
+    (1 to rounds(currentRound)._5).foreach(p => addEnemy(new Miniboss(enemyPath), 100/rounds(currentRound)._5)) // a boss of sorts
+    } else if (currentRound == 20) {
+      addEnemy(new Boss(enemyPath), 1)
+    }
+    else {
+      //create algorithm to keep game going forever
+    }
+    //maybe last round and game completed ?
   }
   private var towerSelected = false
   def selectTower() = towerSelected = true
@@ -102,7 +115,11 @@ class Game(var startingHealt : Int, var startingCoins : Int = 250) {
 
   var toBeDeleted = Buffer[Tower]()
   def sell(tower : Tower): Unit = {
+    if(tower.upgraded) {
+      coins += (tower.cost + tower.upgradeCost) / 2
+    } else {
     coins += tower.cost / 2
+    }
     toBeDeleted += tower
   }
 
