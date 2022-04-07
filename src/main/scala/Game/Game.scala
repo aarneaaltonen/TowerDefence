@@ -4,7 +4,7 @@ import java.awt.{Color, Graphics2D}
 import scala.collection.mutable.Buffer
 import scala.util.Random
 
-class Game(var startingHealt : Int, var startingCoins : Int = 250) {
+class Game(var startingHealt : Int, var startingCoins : Int = 150) {
 
   var coins = startingCoins
   var healtPoints = startingHealt
@@ -42,7 +42,7 @@ class Game(var startingHealt : Int, var startingCoins : Int = 250) {
     (0,0,0,0,0),
     (3,0,0,0,0),
     (5,2,0,0,0),
-    (10,2,1,0,0),
+    (10,2,0,0,0),
     (20,3,1,1,0),
     (30,2,1,2,0),
     (40,2,1,2,0),
@@ -104,6 +104,7 @@ class Game(var startingHealt : Int, var startingCoins : Int = 250) {
 
     if(enemies.isEmpty) {
       paused = true
+
       towers.foreach(_.hasTarget = false)
     }
 

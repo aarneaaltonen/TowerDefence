@@ -14,6 +14,7 @@ import java.awt.{Color, Graphics2D}
  */
 class MinigunTower( position : Pos) extends Tower(2, position, 300, 50, 10){
   var animationFrame = 0
+  var upgradeCost = 1000
 
   def drawGun(g: Graphics2D) = {
     val old = g.getTransform
@@ -40,6 +41,12 @@ class MinigunTower( position : Pos) extends Tower(2, position, 300, 50, 10){
     }
     g.setTransform(old)
   }
+
+  override def upgrade(): Unit = {
+    damage += 20
+    range += 50
+  }
+
 
   def draw(g : Graphics2D) = {
     g.setColor(Color.orange)

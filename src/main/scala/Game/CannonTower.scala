@@ -17,6 +17,9 @@ import math._
 
 class CannonTower(position : Pos) extends Tower(50, position, 120, 70, 80) {
 
+  var upgradeCost = 700
+
+
 
   def drawGun(g: Graphics2D) = {
     val old = g.getTransform
@@ -24,6 +27,12 @@ class CannonTower(position : Pos) extends Tower(50, position, 120, 70, 80) {
     g.rotate(getTargetDirAngle)
     g.fillRoundRect(-10, -5, 40, 10, 5, 5)
     g.setTransform(old)
+  }
+
+  override def upgrade() = {
+    damage += 20
+    range += 100
+    attackSpeed = 50
   }
 
 

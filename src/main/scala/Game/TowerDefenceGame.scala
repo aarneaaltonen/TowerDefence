@@ -1,11 +1,11 @@
 package Game
 
-import scalafx.geometry.Orientation.Horizontal
 
-import java.awt
+
+
 import java.awt.event.ActionListener
-import java.awt.{BasicStroke, Color, Dimension, Font, GradientPaint, Graphics2D, Paint, RenderingHints}
-import java.awt.geom.{AffineTransform, Ellipse2D, GeneralPath, Path2D}
+import java.awt.{BasicStroke, Color, Dimension, Font, Graphics2D, RenderingHints}
+import java.awt.geom.{ GeneralPath, Path2D}
 import scala.swing._
 import scala.swing.event.ButtonClicked
 
@@ -43,16 +43,20 @@ class TowerDefenceGame extends SwingApplication {
   val arena = new Panel {
 
     override def paintComponent(g: Graphics2D): Unit = {
+      g.setColor(new Color(50, 117, 62))
+      g.fillRect(0, 0, 1000, 1000)
 
       g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-      g.setColor(new Color(12, 117, 140))
+      g.setColor(new Color(121, 97, 60))
       g.setStroke(new BasicStroke(30))
       g.draw(drawMap(peli.enemyPath))
+
       if (peli.selected) {
         peli.drawOnMouse(g, mouseXPos, mouseYPos, isPlaceable)
       }
       peli.update(g)
     }
+
   }
 
   val console = new TextPane {
@@ -67,13 +71,20 @@ class TowerDefenceGame extends SwingApplication {
   // create buttons to buy towers
 
   val towerButton1 = new Button {
-    text = "<<buy minigun>>"
+    text = "Minigun"
     font = fontC
   }
-  val towerButton2 = new Button("Buy")
-  val towerButton3 = new Button("Buy")
+  val towerButton2 = new Button("Cannon") {
+    font= fontC
+  }
+  val towerButton3 = new Button("Rocket Launcher") {
+    font= fontC
+  }
 
-  val nextRoundButton = new Button("next round")
+  val nextRoundButton = new Button("Next Round") {
+    foreground = new Color(120, 120, 50)
+    font = fontC
+  }
 
   // create buy menu
 
@@ -101,12 +112,12 @@ class TowerDefenceGame extends SwingApplication {
 
   val stats = new GridPanel(3,2) {
     background = new Color(240,240,155)
-    contents += new Label("Coins:")
-    contents += coinCounter
     contents += new Label("Round:")
     contents += roundIndicator
     contents += new Label("Health:")
     contents += healtPointIndicator
+    contents += new Label("Coins:")
+    contents += coinCounter
 
   }
 
@@ -114,12 +125,28 @@ class TowerDefenceGame extends SwingApplication {
 
   val rightSide = new SplitPane(Orientation.Horizontal, stats, buyMenu)
   rightSide.dividerSize = 0
-  rightSide.dividerLocation = 300
+  rightSide.dividerLocation = 100
+
+  val upgradeButton = new Button("Upgrade") {
+
+  }
+
+  val upgradeMenu = new GridPanel(1,1) {
+    background = new Color(1,100,100)
+
+    contents += upgradeButton
+  }
+  upgradeButton.visible = false
+
+  val extendedRightSide = new SplitPane(Orientation.Horizontal, rightSide, upgradeMenu)
+  extendedRightSide.dividerSize = 0
+  extendedRightSide.dividerLocation = 500
+
 
 
   // all screen elements together in gms
 
-  val gms = new SplitPane(Orientation.Vertical, arenaWithConsole, rightSide) {
+  val gms = new SplitPane(Orientation.Vertical, arenaWithConsole, extendedRightSide) {
 
   }
   def restartGame() = {
@@ -161,6 +188,7 @@ class TowerDefenceGame extends SwingApplication {
     listenTo(towerButton2)
     listenTo(towerButton3)
     listenTo(nextRoundButton)
+    listenTo(upgradeButton)
 
     //react to button clicks
 
@@ -189,6 +217,17 @@ class TowerDefenceGame extends SwingApplication {
             peli.advanceRound()
             console.text = "Round " + peli.currentRound + " Started"
           }
+        }
+        if(b ==upgradeButton) {
+
+          peli.towers.foreach(p => if (p.isSelected) {
+            if (peli.coins >= p.upgradeCost) {
+            p.upgrade()
+            peli.coins -= p.upgradeCost
+            repaint()
+            coinCounter.text = peli.coins.toString
+            } else console.text = "Not Enough Coins To Upgrade"
+          })
         }
       }
     }
@@ -243,15 +282,22 @@ class TowerDefenceGame extends SwingApplication {
 
                 repaint()
               } else {
-                console.text = "not enough money"
+                console.text = "Not Enough Money"
                 peli.unselectTower()
                 repaint()
               }
             } else if(peli.towers.forall(p => !p.isSelected)) { // if no towers are selected
               //select the one that was pressed
-            peli.towers.foreach(p => if(new Pos(point.x, point.y).distance(p.position)< (p.r)/2) p.selectTower())
+              peli.towers.foreach(p => if(new Pos(point.x, point.y).distance(p.position)< (p.r)/2) {
+                p.selectTower()
+                upgradeMenu.contents += new Label("Upgrade Costs: " + p.upgradeCost)
+                upgradeButton.visible = true
+              })
               repaint()
             } else  {
+              upgradeMenu.contents.clear()
+              upgradeMenu.contents += upgradeButton
+              upgradeButton.visible = false
               peli.towers.foreach(_.unselectTower())
               repaint()
             }
@@ -262,8 +308,6 @@ class TowerDefenceGame extends SwingApplication {
       def actionPerformed(e : java.awt.event.ActionEvent) = {
         if(peli.gameOver) {
           console.text = "Game Over"
-
-
         }
         if(!peli.gameOver) {
           if (!peli.paused) {
@@ -272,7 +316,7 @@ class TowerDefenceGame extends SwingApplication {
             roundIndicator.text  = peli.currentRound.toString
             healtPointIndicator.text = peli.healtPoints.toString
             repaint()
-          }
+          } else if (peli.currentRound != 0 && !peli.selected && console.text != "Not Enough Money") console.text = "Round " + peli.currentRound + " Completed \n Press Next Round To Start Round " + (peli.currentRound + 1)
         }
 
       }

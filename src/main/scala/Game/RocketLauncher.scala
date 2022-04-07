@@ -2,13 +2,20 @@ package Game
 
 import java.awt.{Color, Graphics2D}
 
-class RocketLauncher(position : Pos) extends Tower(50, position, 500, 250, 50) {
+class RocketLauncher(position : Pos) extends Tower(15, position, 500, 250, 50) {
+
+  var upgradeCost = 2000
+
   def drawGun(g: Graphics2D) = {
     val old = g.getTransform
     g.translate(position.x, position.y)
     g.rotate(getTargetDirAngle)
     g.fillRoundRect(-10, -5, 40, 10, 5, 5)
     g.setTransform(old)
+  }
+
+  override def upgrade(): Unit = {
+    damage = 50
   }
 
   def draw(g : Graphics2D) = {
