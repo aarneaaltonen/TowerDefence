@@ -2,7 +2,7 @@ package Game
 
 import java.awt.{Color, Graphics2D}
 
-class ThirdEnemy(path : List[Pos]) extends Enemy(150, 4, path : List[Pos], 10) {
+class ThirdEnemy(path : List[Pos]) extends Enemy(220, 4, path : List[Pos], 10) {
 
   def draw(g : Graphics2D) = {
     g.setColor(Color.pink)

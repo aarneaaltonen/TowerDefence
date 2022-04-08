@@ -6,6 +6,7 @@ import scala.collection.mutable
 
 class RocketLauncher(position : Pos) extends Tower(15, position, 500, 250, 60) {
   var minRange = 230
+  var targetAmount = 3
 
   var upgradeCost = 2000
 
@@ -33,7 +34,7 @@ class RocketLauncher(position : Pos) extends Tower(15, position, 500, 250, 60) {
     if (closestEnemy.nonEmpty) {
       if (counter ==attackSpeed) {
         counter = 0
-         closestEnemy.take(3).foreach(p => p.takeDamage(damage))
+         closestEnemy.take(targetAmount).foreach(p => p.takeDamage(damage))
         hasTarget = true
         targetDirAngle = math.atan2((closestEnemy.head.position.y - position.y),(closestEnemy.head.position.x - position.x))
       } else counter += 1
@@ -42,6 +43,7 @@ class RocketLauncher(position : Pos) extends Tower(15, position, 500, 250, 60) {
 
   override def upgrade(): Unit = {
     damage = 50
+    targetAmount = 7
     upgraded = true
   }
 
@@ -53,7 +55,6 @@ class RocketLauncher(position : Pos) extends Tower(15, position, 500, 250, 60) {
       path.append(outerCircle, false)
       path.append(innerCircle, false)
       path
-
     }
     g.setColor(Color.yellow)
     g.fillRoundRect((position.x-(r/2)).toInt,(position.y-(r/2)).toInt, r, r, r , r)

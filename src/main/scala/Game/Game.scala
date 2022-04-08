@@ -5,17 +5,17 @@ import java.awt.{Color, Graphics2D}
 import scala.collection.mutable.Buffer
 import scala.util.Random
 
-class Game(var startingHealt : Int, var startingCoins : Int = 10000) {
+class Game(var startingHealt : Int, var startingCoins : Int = 150) {
 
   var coins = startingCoins
   var healtPoints = startingHealt
   var paused = false
   var towers = Buffer[Tower]()
   var enemies = Buffer[Enemy]()
-  var currentRound = 20
+  var currentRound = 0
   var gameOver = false
   val enemyPath : List[(Pos)] = List(
-                                          new Pos(-100,75),
+                                          new Pos(-300,75),
                                           new Pos(159,77),
                                           new Pos(202,154),
                                           new Pos(320,157),
@@ -41,9 +41,9 @@ class Game(var startingHealt : Int, var startingCoins : Int = 10000) {
    *  */
   var rounds = List[(Int, Int, Int, Int, Int)](
     (0,0,0,0,0),
-    (3,0,0,0,0), //1
-    (5,2,0,0,0), //2
-    (10,2,0,0,0),//3
+    (5,0,0,0,0), //1
+    (7,2,0,0,0), //2
+    (10,2,1,0,0),//3
     (20,3,1,1,0),//4
     (30,2,1,2,0),//5
     (40,2,1,2,0),//6
@@ -54,32 +54,49 @@ class Game(var startingHealt : Int, var startingCoins : Int = 10000) {
     (100,50,20,20,0),//11
     (100,100,50,20,0),//12
     (200,150,50,20,1),//13
-    (800,100,50,20,0),//14
-    (1000,100,50,20,5),//15
-    (1000,100,50,20,10),//16
-    (1000,100,50,20,10),//17
-    (1000,100,50,20,10),//18
-    (1000,100,50,20,10),//19
+    (500,100,50,20,0),//14
+    (500,100,100,20,5),//15
+    (500,100,100,20,10),//16
+    (100,100,100,20,10),//17
+    (100,100,100,20,20),//18
+    (100,100,100,20,40),//19
 
   )
+
+  def createRounds(currentRound : Int, towers : Buffer[Tower], healthPoints : Int) : (Int, Int, Int, Int, Int, Int) = {
+    //random "recipe", not optimized one bit
+    (currentRound * 50 + towers.length*2, towers.length*5,4*healthPoints,currentRound*3,currentRound *2, (currentRound -19))
+  }
+
   def createEnemies(): Unit = {
     //The number of enemies affects the pace in which enemies are created
     //first 19 rounds are given by list
     if (currentRound < 20) {
     (1 to rounds(currentRound)._1).foreach(p => addEnemy(new FirstEnemy(enemyPath), 100/rounds(currentRound)._1)) // make first enemytype slow
 
-    (1 to rounds(currentRound)._2).foreach(p => addEnemy(new SecondEnemy(enemyPath), 50/rounds(currentRound)._2)) // second has lower hp but is faster
+    (1 to rounds(currentRound)._2).foreach(p => addEnemy(new SecondEnemy(enemyPath), 100/rounds(currentRound)._2)) // second has lower hp but is faster
 
-    (1 to rounds(currentRound)._3).foreach(p => addEnemy(new ThirdEnemy(enemyPath), 50/rounds(currentRound)._3)) // third one tanky
+    (1 to rounds(currentRound)._3).foreach(p => addEnemy(new ThirdEnemy(enemyPath), 20/rounds(currentRound)._3)) // third one tanky
 
-    (1 to rounds(currentRound)._4).foreach(p => addEnemy(new FourthEnemy(enemyPath), 100/rounds(currentRound)._4)) // fouth enemytype a nimble one
+    (1 to rounds(currentRound)._4).foreach(p => addEnemy(new FourthEnemy(enemyPath), 20/rounds(currentRound)._4)) // fouth enemytype a nimble one
 
     (1 to rounds(currentRound)._5).foreach(p => addEnemy(new Miniboss(enemyPath), 100/rounds(currentRound)._5)) // a boss of sorts
     } else if (currentRound == 20) {
       addEnemy(new Boss(enemyPath), 1)
-    }
-    else {
+    } else {
       //create algorithm to keep game going forever
+      (1 to createRounds(currentRound, towers, healtPoints)._1).foreach(p => addEnemy(new FirstEnemy(enemyPath), 100/createRounds(currentRound, towers, healtPoints)._1)) // make first enemytype slow
+
+      (1 to createRounds(currentRound, towers, healtPoints)._2).foreach(p => addEnemy(new SecondEnemy(enemyPath), 100/createRounds(currentRound, towers, healtPoints)._2)) // second has lower hp but is faster
+
+      (1 to createRounds(currentRound, towers, healtPoints)._3).foreach(p => addEnemy(new ThirdEnemy(enemyPath), 20/createRounds(currentRound, towers, healtPoints)._3)) // third one tanky
+
+      (1 to createRounds(currentRound, towers, healtPoints)._4).foreach(p => addEnemy(new FourthEnemy(enemyPath), 20/createRounds(currentRound, towers, healtPoints)._4)) // fouth enemytype a nimble one
+
+      (1 to createRounds(currentRound, towers, healtPoints)._5).foreach(p => addEnemy(new Miniboss(enemyPath), 100/createRounds(currentRound, towers, healtPoints)._5)) // a boss of sorts
+
+      (1 to createRounds(currentRound, towers, healtPoints)._6).foreach(p => addEnemy(new Boss(enemyPath), 100/createRounds(currentRound, towers, healtPoints)._6))
+
     }
     //maybe last round and game completed ?
   }
@@ -113,14 +130,14 @@ class Game(var startingHealt : Int, var startingCoins : Int = 10000) {
     createEnemies()
   }
 
-  var toBeDeleted = Buffer[Tower]()
+  var toBeDeletedT = Buffer[Tower]()
   def sell(tower : Tower): Unit = {
     if(tower.upgraded) {
       coins += (tower.cost + tower.upgradeCost) / 2
     } else {
     coins += tower.cost / 2
     }
-    toBeDeleted += tower
+    toBeDeletedT += tower
   }
 
   def step() = {

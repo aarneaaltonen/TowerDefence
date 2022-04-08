@@ -18,8 +18,8 @@ class TowerDefenceGame extends SwingApplication {
   peli.createEnemies()
 
   val fontC = new Font("Serif", Font.BOLD, 15)
-  var mouseXPos = 0
-  var mouseYPos = 0
+  var mouseXPos = -1000
+  var mouseYPos = -1000
   var isPlaceable = false
 
 
@@ -45,18 +45,16 @@ class TowerDefenceGame extends SwingApplication {
       g.draw(drawMap(peli.enemyPath))
 
       if (peli.selected) {
+
         peli.drawOnMouse(g, mouseXPos, mouseYPos, isPlaceable)
       }
       peli.update(g)
     }
-
   }
-
   val console = new TextPane {
     font = fontC
     editable = false
   }
-
   val arenaWithConsole = new SplitPane(Orientation.Horizontal, arena, console) {}
   arenaWithConsole.dividerSize = 0
   arenaWithConsole.dividerLocation = 650
@@ -204,24 +202,28 @@ class TowerDefenceGame extends SwingApplication {
     reactions += {
       case ButtonClicked(b) => {
         if (b == towerButton1) {
+          mouseYPos = -1000
           peli.selectMinigun()
           peli.selectTower()
           console.text = "Minigun Costs 50 Coins. \n Place Down To Buy, Right Click To Cancel"
           repaint()
         }
         if (b == towerButton2) {
+          mouseYPos = -1000
           peli.selectCannon()
           peli.selectTower()
           console.text = "Cannon Costs 80 Coins \n Place Down To Buy, Right Click To Cancel"
           repaint()
         }
         if(b == towerButton3) {
+          mouseYPos = -1000
           peli.selectRocketLauncher()
           peli.selectTower()
           console.text = "Rocket launcher Costs 250 Coins \n Place Down To Buy, Right Click To Cancel"
           repaint()
         }
         if(b== towerButton4) {
+          mouseYPos = -1000
           peli.selectFlamethrower()
           peli.selectTower()
           console.text = "Flamethrower Costs 1500 Coins\n Attacks all enemies in range \n Place Down To Buy, Right Click To Cancel"
@@ -229,6 +231,7 @@ class TowerDefenceGame extends SwingApplication {
         }
         if (b == nextRoundButton) {
           if (peli.paused) {
+            peli.towers.foreach(_.isSelected = false)
             peli.advanceRound()
             console.text = "Round " + peli.currentRound + " Started"
           }
@@ -238,11 +241,11 @@ class TowerDefenceGame extends SwingApplication {
           peli.towers.foreach(p => if (p.isSelected) {
             if(!p.upgraded) {
               if (peli.coins >= p.upgradeCost) {
-              p.upgrade()
-              peli.coins -= p.upgradeCost
-              repaint()
-              coinCounter.text = peli.coins.toString
-              console.text = "Sell For " + (if(p.upgraded) {(p.cost + p.upgradeCost)/2} else p.cost/2) +" Coins\n" + (if(p.upgraded) "Tier 1"else "Upgrading Costs " + p.upgradeCost + " Coins")
+                p.upgrade()
+                peli.coins -= p.upgradeCost
+                repaint()
+                coinCounter.text = peli.coins.toString
+                console.text = "Sell For " + (if(p.upgraded) {(p.cost + p.upgradeCost)/2} else p.cost/2) +" Coins\n" + (if(p.upgraded) "Tier 1"else "Upgrading Costs " + p.upgradeCost + " Coins")
               } else console.text = "Not Enough Coins To Upgrade"
             } else console.text = "Already Upgraded"
           })
@@ -252,7 +255,7 @@ class TowerDefenceGame extends SwingApplication {
             peli.sell(p)
             console.text = "Sold For " + (if(p.upgraded) {(p.cost + p.upgradeCost)/2} else p.cost/2) + " Coins"
           })
-          peli.towers --= peli.toBeDeleted
+          peli.towers --= peli.toBeDeletedT
           upgradeMenu.contents.clear()
           upgradeButton.visible = false
           peli.towers.foreach(_.unselectTower())
@@ -266,14 +269,14 @@ class TowerDefenceGame extends SwingApplication {
       case scala.swing.event.MouseMoved(src, point, k) => {
         if (peli.selected) {
           //cant place new tower on top of another tower
-          if (peli.towers.forall(p => new Pos(point.x, point.y).distance(p.position)> p.r)) {
+          if (peli.towers.forall(p => new Pos(point.x, point.y).distance(p.position)> p.r) ) {
+
             isPlaceable = true
             // cant place tower on enemy path
             if (new BasicStroke(3).createStrokedShape(drawMap(peli.enemyPath)).intersects(point.x-30, point.y-30, 60, 60)) {
               isPlaceable = false
             }
           } else isPlaceable = false
-          drawMap(peli.enemyPath)
 
           mouseXPos = point.x
           mouseYPos = point.y
