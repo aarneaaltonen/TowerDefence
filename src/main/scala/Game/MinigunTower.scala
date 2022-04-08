@@ -16,6 +16,15 @@ import java.awt.{BasicStroke, Color, Graphics2D}
 class MinigunTower( position : Pos) extends Tower(2, position, 300, 50, 10){
   var animationFrame = 0
   var upgradeCost = 1000
+  var upgradeCost2 = 100000
+  var upgradedTwice = false
+
+  override def getUpgradeCost: Int = {
+    if(upgraded) {
+      upgradeCost2
+    } else upgradeCost
+  }
+
 
   def drawGun(g: Graphics2D) = {
     val old = g.getTransform
@@ -51,16 +60,28 @@ class MinigunTower( position : Pos) extends Tower(2, position, 300, 50, 10){
       upgraded = true
 
   }
+  override def upgrade2() = {
+    damage = 100
+    range = 1000
+    attackSpeed = 2
+    upgradedTwice = true
+  }
 
 
   def draw(g : Graphics2D) = {
     g.setColor(Color.orange)
     g.fillRoundRect((position.x-(r/2)).toInt,(position.y-(r/2)).toInt, r, r, r , r)
+    if(upgradedTwice) {
+      g.setColor(new Color(103, 74, 147))
+      g.fillRoundRect((position.x-(r/2)).toInt,(position.y-(r/2)).toInt, r, r, r , r)
+    }
     if(upgraded) {
       g.setColor(new Color(162, 138, 80))
       g.setStroke(new BasicStroke(4))
       g.draw(new Ellipse2D.Double((position.x-(r/2)).toInt,(position.y-(r/2)).toInt,r,r))
     }
+
+
     g.setColor(Color.darkGray)
     drawGun(g)
     if (isSelected) {

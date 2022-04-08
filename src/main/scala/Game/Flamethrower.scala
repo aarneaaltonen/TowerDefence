@@ -48,7 +48,7 @@ class Flamethrower(position : Pos) extends Tower(2, position, 150, 1500, 8) {
   }
 
   override def upgrade(): Unit = {
-    damage = 4
+    damage = 3
     range = 250
     upgraded = true
   }

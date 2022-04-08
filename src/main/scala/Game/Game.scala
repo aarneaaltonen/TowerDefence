@@ -5,7 +5,7 @@ import java.awt.{Color, Graphics2D}
 import scala.collection.mutable.Buffer
 import scala.util.Random
 
-class Game(var startingHealt : Int, var startingCoins : Int = 150) {
+class Game(var startingHealt : Int, var startingCoins : Int = 1500000) {
 
   var coins = startingCoins
   var healtPoints = startingHealt
@@ -63,9 +63,9 @@ class Game(var startingHealt : Int, var startingCoins : Int = 150) {
 
   )
 
-  def createRounds(currentRound : Int, towers : Buffer[Tower], healthPoints : Int) : (Int, Int, Int, Int, Int, Int) = {
+  def createRounds(currentRound : Int, towers : Buffer[Tower], healthPoints : Int, coins : Int) : (Int, Int, Int, Int, Int, Int) = {
     //random "recipe", not optimized one bit
-    (currentRound * 50 + towers.length*2, towers.length*5,4*healthPoints,currentRound*3,currentRound *2, (currentRound -19))
+    ((currentRound * 50 + towers.length*2) / coins, towers.length*5,4*healthPoints * currentRound,currentRound*3,currentRound *2, (currentRound -19))
   }
 
   def createEnemies(): Unit = {
@@ -85,17 +85,17 @@ class Game(var startingHealt : Int, var startingCoins : Int = 150) {
       addEnemy(new Boss(enemyPath), 1)
     } else {
       //create algorithm to keep game going forever
-      (1 to createRounds(currentRound, towers, healtPoints)._1).foreach(p => addEnemy(new FirstEnemy(enemyPath), 100/createRounds(currentRound, towers, healtPoints)._1)) // make first enemytype slow
+      (1 to createRounds(currentRound, towers, healtPoints, coins)._1).foreach(p => addEnemy(new FirstEnemy(enemyPath), 100/createRounds(currentRound, towers, healtPoints, coins)._1)) // make first enemytype slow
 
-      (1 to createRounds(currentRound, towers, healtPoints)._2).foreach(p => addEnemy(new SecondEnemy(enemyPath), 100/createRounds(currentRound, towers, healtPoints)._2)) // second has lower hp but is faster
+      (1 to createRounds(currentRound, towers, healtPoints, coins)._2).foreach(p => addEnemy(new SecondEnemy(enemyPath), 100/createRounds(currentRound, towers, healtPoints, coins)._2)) // second has lower hp but is faster
 
-      (1 to createRounds(currentRound, towers, healtPoints)._3).foreach(p => addEnemy(new ThirdEnemy(enemyPath), 20/createRounds(currentRound, towers, healtPoints)._3)) // third one tanky
+      (1 to createRounds(currentRound, towers, healtPoints, coins)._3).foreach(p => addEnemy(new ThirdEnemy(enemyPath), 20/createRounds(currentRound, towers, healtPoints, coins)._3)) // third one tanky
 
-      (1 to createRounds(currentRound, towers, healtPoints)._4).foreach(p => addEnemy(new FourthEnemy(enemyPath), 20/createRounds(currentRound, towers, healtPoints)._4)) // fouth enemytype a nimble one
+      (1 to createRounds(currentRound, towers, healtPoints, coins)._4).foreach(p => addEnemy(new FourthEnemy(enemyPath), 20/createRounds(currentRound, towers, healtPoints, coins)._4)) // fouth enemytype a nimble one
 
-      (1 to createRounds(currentRound, towers, healtPoints)._5).foreach(p => addEnemy(new Miniboss(enemyPath), 100/createRounds(currentRound, towers, healtPoints)._5)) // a boss of sorts
+      (1 to createRounds(currentRound, towers, healtPoints, coins)._5).foreach(p => addEnemy(new Miniboss(enemyPath), 100/createRounds(currentRound, towers, healtPoints, coins)._5)) // a boss of sorts
 
-      (1 to createRounds(currentRound, towers, healtPoints)._6).foreach(p => addEnemy(new Boss(enemyPath), 100/createRounds(currentRound, towers, healtPoints)._6))
+      (1 to createRounds(currentRound, towers, healtPoints, coins)._6).foreach(p => addEnemy(new Boss(enemyPath), 100/createRounds(currentRound, towers, healtPoints, coins)._6))
 
     }
     //maybe last round and game completed ?

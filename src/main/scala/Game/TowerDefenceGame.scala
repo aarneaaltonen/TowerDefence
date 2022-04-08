@@ -22,6 +22,8 @@ class TowerDefenceGame extends SwingApplication {
   var mouseYPos = -1000
   var isPlaceable = false
 
+  var playSpeed = 1
+
 
   def drawMap(path : List[Pos]) = {
     val polyline = new GeneralPath(Path2D.WIND_NON_ZERO, 30)
@@ -79,6 +81,9 @@ class TowerDefenceGame extends SwingApplication {
     foreground = new Color(120, 120, 50)
     font = fontC
   }
+  val speedUpButton = new Button(">>") {
+    font = fontC
+  }
 
   // create buy menu
 
@@ -88,6 +93,7 @@ class TowerDefenceGame extends SwingApplication {
     contents += towerButton3
     contents += towerButton4
     contents += nextRoundButton
+    contents += speedUpButton
 
   }
 
@@ -160,13 +166,8 @@ class TowerDefenceGame extends SwingApplication {
     console.text = "Started New Game"
   }
 
-
   gms.dividerSize = 0
   gms.dividerLocation = 900
-
-
-
-
 
 
   override def startup(args : Array[String]) = {}
@@ -186,6 +187,13 @@ class TowerDefenceGame extends SwingApplication {
         (restartGame()))
       }
     }
+    def stepper() = {
+      peli.step()
+            coinCounter.text = peli.coins.toString
+            roundIndicator.text  = peli.currentRound.toString
+            healtPointIndicator.text = peli.healtPoints.toString
+            repaint()
+    }
     contents = gms
     listenTo(arena.mouse.clicks)
     listenTo(arena.mouse.moves)
@@ -196,6 +204,7 @@ class TowerDefenceGame extends SwingApplication {
     listenTo(nextRoundButton)
     listenTo(upgradeButton)
     listenTo(sellButton)
+    listenTo(speedUpButton)
 
     //react to button clicks
 
@@ -236,16 +245,28 @@ class TowerDefenceGame extends SwingApplication {
             console.text = "Round " + peli.currentRound + " Started"
           }
         }
+        if(b == speedUpButton) {
+          if (playSpeed < 8) {
+            playSpeed += 3
+          } else playSpeed = 1
+        }
         if(b ==upgradeButton) {
-
           peli.towers.foreach(p => if (p.isSelected) {
-            if(!p.upgraded) {
+            if(p.getClass.getName =="Game.MinigunTower" && p.isSelected && p.upgraded) {
+
+              if(peli.coins >= p.getUpgradeCost) {
+                p.upgrade2()
+                peli.coins -= p.getUpgradeCost
+                repaint()
+                coinCounter.text = peli.coins.toString
+              } else console.text = "Not Enough Coins To Upgrade"
+            } else if(!p.upgraded) {
               if (peli.coins >= p.upgradeCost) {
                 p.upgrade()
                 peli.coins -= p.upgradeCost
                 repaint()
                 coinCounter.text = peli.coins.toString
-                console.text = "Sell For " + (if(p.upgraded) {(p.cost + p.upgradeCost)/2} else p.cost/2) +" Coins\n" + (if(p.upgraded) "Tier 1"else "Upgrading Costs " + p.upgradeCost + " Coins")
+                console.text = "Sell For " + (if(p.upgraded) {(p.cost + p.upgradeCost)/2} else p.cost/2) +" Coins\n" + (if(p.upgraded && (!(peli.selectedTowerType == peli.minigun))) "Tier 1"else "Upgrading Costs " + p.getUpgradeCost + " Coins")
               } else console.text = "Not Enough Coins To Upgrade"
             } else console.text = "Already Upgraded"
           })
@@ -323,7 +344,7 @@ class TowerDefenceGame extends SwingApplication {
               //select the one that was pressed
               peli.towers.foreach(p => if(new Pos(point.x, point.y).distance(p.position)< (p.r)/2) {
                 p.selectTower()
-                console.text = "Sell For " + (if(p.upgraded) {(p.cost + p.upgradeCost)/2} else p.cost/2) +" Coins\n" + (if(p.upgraded) "Tier 1"else "Upgrading Costs " + p.upgradeCost + " Coins")
+                console.text = "Sell For " + (if(p.upgraded) {(p.cost + p.upgradeCost)/2} else p.cost/2) +" Coins\n" + (if(p.upgraded && (!(peli.selectedTowerType == peli.minigun))) "Tier 1"else "Upgrading Costs " + p.getUpgradeCost + " Coins")
                 updateUpgradeMenu(p)
                 upgradeButton.visible = true
               })
@@ -344,13 +365,11 @@ class TowerDefenceGame extends SwingApplication {
         }
         if(!peli.gameOver) {
           if (!peli.paused) {
-            peli.step()
-            coinCounter.text = peli.coins.toString
-            roundIndicator.text  = peli.currentRound.toString
-            healtPointIndicator.text = peli.healtPoints.toString
-            repaint()
+            (1 to playSpeed).foreach(p => stepper())
+
           } else if (peli.currentRound != 0 && !peli.selected && console.text != "Not Enough Money") console.text = "Round " + peli.currentRound + " Completed \n Press Next Round To Start Round " + (peli.currentRound + 1)
         }
+
 
       }
     }

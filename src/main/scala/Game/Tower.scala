@@ -9,8 +9,12 @@ abstract class Tower(var damage : Int, var position : Pos, var range : Int,var c
   var r = 50
   var isSelected = false
   var upgraded = false
-
   var upgradeCost : Int
+  def getUpgradeCost = {
+    upgradeCost
+  }
+
+
 
   def selectTower() = isSelected = true
   def unselectTower() = isSelected = false
@@ -21,6 +25,8 @@ abstract class Tower(var damage : Int, var position : Pos, var range : Int,var c
   private var targetDirAngle = math.Pi
   def getTargetDirAngle = {
     targetDirAngle
+  }
+  def upgrade2() = {
   }
 
 
