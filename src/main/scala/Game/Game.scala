@@ -5,7 +5,7 @@ import java.awt.{Color, Graphics2D}
 import scala.collection.mutable.Buffer
 import scala.util.Random
 
-class Game(var startingHealt : Int, var startingCoins : Int = 1500000) {
+class Game(var startingHealt : Int, var startingCoins : Int = 150) {
 
   var coins = startingCoins
   var healtPoints = startingHealt
@@ -48,7 +48,7 @@ class Game(var startingHealt : Int, var startingCoins : Int = 1500000) {
     (30,2,1,2,0),//5
     (40,2,1,2,0),//6
     (80,2,1,2,0),//7
-    (40,30,1,2,0),//8
+    (80,30,1,2,0),//8
     (40,2,20,2,0),//9
     (0,0,0,0,1),//10
     (100,50,20,20,0),//11

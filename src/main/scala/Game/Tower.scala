@@ -22,6 +22,7 @@ abstract class Tower(var damage : Int, var position : Pos, var range : Int,var c
 
 
   var counter = 0
+  var lenFromTarget = 0.0
   private var targetDirAngle = math.Pi
   def getTargetDirAngle = {
     targetDirAngle
@@ -45,6 +46,7 @@ abstract class Tower(var damage : Int, var position : Pos, var range : Int,var c
       if (counter ==attackSpeed) {
         counter = 0
          closestEnemy.head.takeDamage(damage)
+        lenFromTarget = closestEnemy.head.position.distance(this.position)
         hasTarget = true
         targetDirAngle = math.atan2((closestEnemy.head.position.y - position.y),(closestEnemy.head.position.x - position.x))
       } else counter += 1

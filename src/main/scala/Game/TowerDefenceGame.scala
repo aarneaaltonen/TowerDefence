@@ -81,7 +81,8 @@ class TowerDefenceGame extends SwingApplication {
     foreground = new Color(120, 120, 50)
     font = fontC
   }
-  val speedUpButton = new Button(">>") {
+  val speedUpButton = new Button(">") {
+
     font = fontC
   }
 
@@ -138,11 +139,13 @@ class TowerDefenceGame extends SwingApplication {
   }
 
   val upgradeMenu = new GridPanel(3,1) {
-    background = new Color(1,100,100)
+    background = new Color(240,240,155)
     contents += upgradeButton
   }
   def updateUpgradeMenu(p : Tower) = {
-    upgradeMenu.contents += new Label("Upgrade Costs: "+ p.upgradeCost + " Coins")
+    if(!p.upgraded || p.getClass.getName =="Game.MinigunTower") {
+      upgradeMenu.contents += new Label("Upgrade Costs: "+ p.getUpgradeCost + " Coins")
+    } else upgradeMenu.contents += new Label("Fully Upgraded")
     upgradeMenu.contents += upgradeButton
     upgradeMenu.contents += sellButton
 
@@ -246,9 +249,14 @@ class TowerDefenceGame extends SwingApplication {
           }
         }
         if(b == speedUpButton) {
-          if (playSpeed < 8) {
+          if (playSpeed < 5) {
             playSpeed += 3
+
           } else playSpeed = 1
+          if(playSpeed == 1) speedUpButton.text = ">"
+            else if(playSpeed == 4)speedUpButton.text =  ">>"
+            else speedUpButton.text = ">>>"
+          speedUpButton.revalidate()
         }
         if(b ==upgradeButton) {
           peli.towers.foreach(p => if (p.isSelected) {
@@ -362,20 +370,17 @@ class TowerDefenceGame extends SwingApplication {
       def actionPerformed(e : java.awt.event.ActionEvent) = {
         if(peli.gameOver) {
           console.text = "Game Over"
+          playSpeed = 0
         }
         if(!peli.gameOver) {
           if (!peli.paused) {
             (1 to playSpeed).foreach(p => stepper())
-
           } else if (peli.currentRound != 0 && !peli.selected && console.text != "Not Enough Money") console.text = "Round " + peli.currentRound + " Completed \n Press Next Round To Start Round " + (peli.currentRound + 1)
         }
-
-
       }
     }
     val timer = new javax.swing.Timer(6, listener)
     timer.start()
-
   }
   val t = top
   t.centerOnScreen()

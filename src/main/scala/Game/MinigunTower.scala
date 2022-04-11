@@ -2,6 +2,7 @@ package Game
 
 import java.awt.geom.Ellipse2D
 import java.awt.{BasicStroke, Color, Graphics2D}
+import scala.util.Random
 
 /**
  * MinigunTower is a tower with fixed parameters for damage, range, cost and attackspeed
@@ -14,10 +15,11 @@ import java.awt.{BasicStroke, Color, Graphics2D}
  * @param position given by player
  */
 class MinigunTower( position : Pos) extends Tower(2, position, 300, 50, 10){
-  var animationFrame = 0
+  private var animationFrame = 0
   var upgradeCost = 1000
   var upgradeCost2 = 100000
   var upgradedTwice = false
+  val random = scala.util.Random
 
   override def getUpgradeCost: Int = {
     if(upgraded) {
@@ -31,6 +33,7 @@ class MinigunTower( position : Pos) extends Tower(2, position, 300, 50, 10){
     g.translate(position.x, position.y)
     g.rotate(getTargetDirAngle)
     if (hasTarget) {
+      g.setColor(Color.darkGray)
       if (animationFrame == 1) {
         g.fillRoundRect(-12, -6, 40, 4, 5, 5)
         g.fillRoundRect(-12, 4, 40, 4, 5, 5)
@@ -40,6 +43,11 @@ class MinigunTower( position : Pos) extends Tower(2, position, 300, 50, 10){
         g.fillRoundRect(-13, 4, 40, 4, 5, 5)
         animationFrame = 0
       } else {
+        if(upgraded) {
+          g.setColor(new Color(162,138,90))
+        }
+        g.fillRoundRect( r/2 +random.nextInt(math.max(1,(lenFromTarget.toInt-r/2))),random.nextInt(2), 4, 4, 4 , 4)
+        g.setColor(Color.darkGray)
         g.fillRoundRect(-11, -6, 40, 4, 5, 5)
         g.fillRoundRect(-11, 4, 40, 4, 5, 5)
         animationFrame += 1
@@ -56,14 +64,14 @@ class MinigunTower( position : Pos) extends Tower(2, position, 300, 50, 10){
 
       damage = 5
       range = 400
-      attackSpeed = 4
+
       upgraded = true
 
   }
   override def upgrade2() = {
-    damage = 100
+    damage = 400
     range = 1000
-    attackSpeed = 2
+
     upgradedTwice = true
   }
 
